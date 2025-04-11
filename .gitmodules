@@ -7,3 +7,6 @@
 [submodule "FluentLauncher.Infra.UI"]
 	path = FluentLauncher.Infra.UI
 	url = https://github.com/Xcube-Studio/FluentLauncher.Infra.UI.git
+[submodule "ConnectX"]
+	path = ConnectX
+	url = https://github.com/Corona-Studio/ConnectX

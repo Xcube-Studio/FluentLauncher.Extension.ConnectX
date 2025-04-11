@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Infrastructures/">
+    <Project Path="ConnectX/ConnectX.Client/ConnectX.Client.csproj" />
+    <Project Path="FluentLauncher.Infra.ExtensionHost/FluentLauncher.Infra.ExtensionHost/FluentLauncher.Infra.ExtensionHost.csproj" />
+    <Project Path="FluentLauncher.Infra.Settings/FluentLauncher.Infra.Settings.SourceGenerators/FluentLauncher.Infra.Settings.SourceGenerators.csproj" />
+    <Project Path="FluentLauncher.Infra.Settings/FluentLauncher.Infra.Settings/FluentLauncher.Infra.Settings.csproj" />
+    <Project Path="FluentLauncher.Infra.UI/FluentLauncher.Infra.UI/FluentLauncher.Infra.UI.csproj" />
+  </Folder>
+  <Project Path="FluentLauncher.Extension.ConnectX/FluentLauncher.Extension.ConnectX.csproj" />
+</Solution>

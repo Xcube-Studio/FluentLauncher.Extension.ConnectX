@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="FluentLauncher.Extension.ConnectX.Views.CreateRoomDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:FluentLauncher.Extension.ConnectX.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="创建一个联机房间"
+    CloseButtonCommand="{x:Bind VM.CancelCommand}"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    IsPrimaryButtonEnabled="{x:Bind VM.CanCreateRoom, Mode=OneWay}"
+    PrimaryButtonCommand="{x:Bind VM.CreateRoomCommand}"
+    PrimaryButtonText="创建"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="4">
+        <StackPanel.ChildrenTransitions>
+            <EntranceThemeTransition FromVerticalOffset="50" />
+            <RepositionThemeTransition IsStaggeringEnabled="False" />
+        </StackPanel.ChildrenTransitions>
+
+        <TextBox
+            Header="房间名"
+            PlaceholderText="必填"
+            Text="{x:Bind VM.RoomName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBox
+            x:Name="PasswordBox"
+            x:Load="{x:Bind VM.IsPrivate, Mode=OneWay}"
+            Header="房间口令"
+            PlaceholderText="必填"
+            Text="{x:Bind VM.RoomPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+        <TextBox
+            Header="其他描述"
+            PlaceholderText="描述信息"
+            Text="{x:Bind VM.RoomDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+        <NumberBox
+            Header="最大房间人数"
+            Maximum="10"
+            Minimum="2"
+            SmallChange="1"
+            SpinButtonPlacementMode="Inline"
+            Value="{x:Bind VM.MaxUserNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <CheckBox Content="私人房间" IsChecked="{x:Bind VM.IsPrivate, Mode=TwoWay}" />
+
+            <CheckBox Content="使用中继服务器" IsChecked="{x:Bind VM.UseRelay, Mode=TwoWay}" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>
