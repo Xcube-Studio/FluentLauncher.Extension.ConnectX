@@ -22,7 +22,9 @@ namespace FluentLauncher.Extension.ConnectX;
 
 public class ConnectXExtension : IExtension, INavigationProviderExtension
 {
-    public string Name => "FluentLauncher.Extension.ConnectX";
+    string IExtension.Name => "FluentLauncher.Extension.ConnectX";
+
+    string IExtension.Description => "[Preview] 适用于 Fluent Launcher 的 ConnectX 多人联机支持";
 
     public static IServiceProvider? Services { get; private set; }
 
