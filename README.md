@@ -1,2 +1,2 @@
 # FluentLauncher.Extension.ConnectX
-FluentLauncher.Extension.ConnectX_
+FluentLauncher.Extension.ConnectX
