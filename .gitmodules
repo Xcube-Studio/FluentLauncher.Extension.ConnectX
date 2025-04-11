@@ -1,3 +1,6 @@
 [submodule "FluentLauncher.Infra.ExtensionHost"]
 	path = FluentLauncher.Infra.ExtensionHost
 	url = https://github.com/Xcube-Studio/FluentLauncher.Infra.ExtensionHost.git
+[submodule "FluentLauncher.Infra.Settings"]
+	path = FluentLauncher.Infra.Settings
+	url = https://github.com/Xcube-Studio/FluentLauncher.Infra.Settings.git
