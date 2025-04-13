@@ -7,7 +7,6 @@
     xmlns:local="using:FluentLauncher.Extension.ConnectX.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="加入一个联机房间"
-    CloseButtonCommand="{x:Bind VM.CancelCommand}"
     CloseButtonText="取消"
     DefaultButton="Primary"
     IsPrimaryButtonEnabled="{x:Bind VM.CanJoinRoom, Mode=OneWay}"

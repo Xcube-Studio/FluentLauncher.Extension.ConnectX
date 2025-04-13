@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
-using FluentLauncher.Infra.UI.Dialogs;
 using System;
 using System.Threading.Tasks;
 
@@ -11,10 +10,8 @@ namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
 internal partial class JoinRoomDialogViewModel(
     RoomService roomService, 
-    IServerLinkHolder serverLinkHolder) : ObservableRecipient, IDialogParameterAware
+    IServerLinkHolder serverLinkHolder) : ObservableRecipient
 {
-    private TaskCompletionSource? taskCompletionSource;
-
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanJoinRoom))]
     public partial string RoomShortId { get; set; } = string.Empty;
@@ -44,11 +41,6 @@ internal partial class JoinRoomDialogViewModel(
         }
     }
 
-    void IDialogParameterAware.HandleParameter(object param)
-    {
-        taskCompletionSource = param as TaskCompletionSource;
-    }
-
     [RelayCommand]
     async Task JoinRoomAsync()
     {
@@ -60,10 +52,5 @@ internal partial class JoinRoomDialogViewModel(
             UserId = serverLinkHolder.UserId,
             UseRelayServer = UseRelay
         });
-
-        taskCompletionSource?.SetResult();
     }
-
-    [RelayCommand]
-    void Cancel() => taskCompletionSource?.SetResult();
 }

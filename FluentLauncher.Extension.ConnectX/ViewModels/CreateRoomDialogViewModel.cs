@@ -3,24 +3,14 @@ using CommunityToolkit.Mvvm.Input;
 using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
-using FluentLauncher.Infra.UI.Dialogs;
 using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
-internal partial class CreateRoomDialogViewModel : ObservableRecipient, IDialogParameterAware
+internal partial class CreateRoomDialogViewModel(
+    IServerLinkHolder serverLinkHolder, 
+    RoomService roomService) : ObservableRecipient
 {
-    private readonly IServerLinkHolder _serverLinkHolder;
-    private readonly RoomService _roomService;
-
-    private TaskCompletionSource? taskCompletionSource;
-
-    public CreateRoomDialogViewModel(IServerLinkHolder serverLinkHolder, RoomService roomService)
-    {
-        _serverLinkHolder = serverLinkHolder;
-        _roomService = roomService;
-    }
-
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateRoom))]
     public partial string RoomName { get; set; } = string.Empty;
@@ -60,15 +50,10 @@ internal partial class CreateRoomDialogViewModel : ObservableRecipient, IDialogP
         }
     }
 
-    void IDialogParameterAware.HandleParameter(object param)
-    {
-        taskCompletionSource = param as TaskCompletionSource;
-    }
-
     [RelayCommand]
     async Task CreateRoom()
     {
-        await _roomService.CreateRoomAsync(new CreateGroup
+        await roomService.CreateRoomAsync(new CreateGroup
         {
             MaxUserCount = MaxUserNumber,
             RoomName = RoomName,
@@ -76,12 +61,7 @@ internal partial class CreateRoomDialogViewModel : ObservableRecipient, IDialogP
             RoomPassword = RoomPassword,
             IsPrivate = IsPrivate,
             UseRelayServer = UseRelay,
-            UserId = _serverLinkHolder.UserId
+            UserId = serverLinkHolder.UserId
         });
-
-        taskCompletionSource?.SetResult();
     }
-
-    [RelayCommand]
-    void Cancel() => taskCompletionSource?.SetResult();
 }

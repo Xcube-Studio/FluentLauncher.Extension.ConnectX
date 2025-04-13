@@ -29,7 +29,7 @@ internal class ConnectService
         private set
         {
             field = value;
-            WeakReferenceMessenger.Default.Send(new ServerStateChangedMessage(value));
+            WeakReferenceMessenger.Default.Send(new ServerConnectStatusChangedMessage(value));
         }
     } = ServerConnectStatus.Disconnected;
 

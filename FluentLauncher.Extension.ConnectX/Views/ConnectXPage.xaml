@@ -106,12 +106,13 @@
                         Title="公益性服务"
                         IsClosable="False"
                         IsOpen="True"
-                        Message="请不要攻击我们的联机服务器。该联机服务需要不小的成本，我们的服务是完全公益性质的，且服务器无法负担得起高连接数和高带宽流量，所以请不要攻击我们的联机服务器。"
+                        Message="请不要攻击我们的联机服务器。该联机服务需要不小的成本，我们的服务是完全公益性质的，且服务器无法负担得起高连接数和高带宽流量，所以请不要攻击我们的联机服务器。另外，ConnectX 本身有一整套从客户端到服务端的开源实现，如果我们的服务节点出现了问题，用户可以自行部署节点并输入使用。MiaoVps 向我们提供了一个赞助节点，你可以在下方的服务节点中选择。"
                         Opacity="0.85"
                         Severity="Success" />
 
                     <StackPanel Orientation="Horizontal">
                         <HyperlinkButton Content="ConnectX 仓库" NavigateUri="https://github.com/Corona-Studio/ConnectX" />
+                        <HyperlinkButton Content="MiaoVps" NavigateUri="https://www.miaovps.com" />
                     </StackPanel>
 
                     <TextBlock Style="{ThemeResource SettingsSectionHeaderTextBlockStyle}" Text="服务状态" />
@@ -185,7 +186,7 @@
 
                                     <ComboBox SelectedIndex="{x:Bind VM.ServerNodeSelection, Mode=TwoWay}">
                                         <ComboBoxItem Content="启动器自建节点" />
-                                        <ComboBoxItem Content="喵云赞助节点" IsEnabled="False" />
+                                        <ComboBoxItem Content="喵云赞助节点" />
                                         <ComboBoxItem Content="用户输入节点" />
                                     </ComboBox>
                                 </StackPanel>
@@ -230,7 +231,7 @@
                                 Width="16"
                                 Height="16"
                                 VerticalAlignment="Center"
-                                x:Load="{x:Bind VM.OperatingRoom, Mode=OneWay}" />
+                                x:Load="{x:Bind VM.IsOperatingRoom, Mode=OneWay}" />
                             <Button
                                 Command="{x:Bind VM.CreateRoomCommand}"
                                 Content="创建房间"
@@ -336,50 +337,52 @@
                         </StackPanel>
                     </controls:SettingsCard>
 
-                    <ItemsView
+                    <GridView
                         x:Name="UserView"
                         x:Load="{x:Bind VM.IsInRoom, Mode=OneWay}"
                         IsEnabled="{x:Bind VM.IsConnected, Mode=OneWay}"
                         ItemsSource="{x:Bind VM.RoomInfo.Users, Mode=OneWay}">
-                        <ItemsView.ItemTemplate>
+                        <GridView.ItemTemplate>
                             <DataTemplate x:DataType="group:UserInfo">
-                                <ItemContainer>
-                                    <Border
-                                        Padding="16,8"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Background="{ThemeResource SettingsCardBackground}"
-                                        BorderBrush="{ThemeResource SettingsCardBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8">
+                                <Border
+                                    Padding="16,8"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Background="{ThemeResource SettingsCardBackground}"
+                                    BorderBrush="{ThemeResource SettingsCardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    PointerEntered="Border_PointerEntered"
+                                    PointerExited="Border_PointerExited">
 
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="1*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="1*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                                            <FontIcon FontSize="14" Glyph="&#xe77b;" />
+                                        <FontIcon FontSize="14" Glyph="&#xe77b;" />
 
-                                            <TextBlock
-                                                Grid.Column="1"
-                                                Margin="16,0"
-                                                VerticalAlignment="Center"
-                                                Style="{ThemeResource BaseTextBlockStyle}"
-                                                Text="{x:Bind DisplayName}" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="16,0"
+                                            VerticalAlignment="Center"
+                                            Style="{ThemeResource BaseTextBlockStyle}"
+                                            Text="{x:Bind DisplayName}" />
 
-                                            <Button Grid.Column="2" Content="移出" />
-                                        </Grid>
-                                    </Border>
-                                </ItemContainer>
+                                        <Button
+                                            Name="KickButton"
+                                            Grid.Column="2"
+                                            CommandParameter="{x:Bind}"
+                                            Content="移出"
+                                            Loaded="KickButton_Loaded"
+                                            Visibility="Collapsed" />
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
-                        </ItemsView.ItemTemplate>
-
-                        <ItemsView.Layout>
-                            <UniformGridLayout />
-                        </ItemsView.Layout>
-                    </ItemsView>
+                        </GridView.ItemTemplate>
+                    </GridView>
 
                     <TeachingTip
                         Title="已复制到剪切板"

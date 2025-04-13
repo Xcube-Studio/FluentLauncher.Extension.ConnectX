@@ -26,10 +26,11 @@ internal partial class ConnectXViewModel(
     ClientSettingProvider settingProvider,
     IServerLinkHolder serverLinkHolder,
     IDialogActivationService<ContentDialogResult> dialogService) : ObservableRecipient,
-    IRecipient<RoomStateChangedMessage>,
     IRecipient<ServerConnectFailedMessage>, 
-    IRecipient<ServerStateChangedMessage>,
-    IRecipient<RoomInfoUpdatedMessage>
+    IRecipient<ServerConnectStatusChangedMessage>,
+    IRecipient<RoomOperatingMessage>,
+    IRecipient<RoomInfoUpdatedMessage>,
+    IRecipient<RoomStateChangedMessage>
 {
     internal DispatcherQueue Dispatcher { get; set; } = null!;
 
@@ -58,7 +59,7 @@ internal partial class ConnectXViewModel(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateOrJoinRoom))]
-    public partial bool OperatingRoom { get; set; }
+    public partial bool IsOperatingRoom { get; set; } = roomService.IsOperatingRoom;
 
     [ObservableProperty]
     public partial bool CopyTeachingTipIsOpen { get; set; }
@@ -72,7 +73,7 @@ internal partial class ConnectXViewModel(
 
     public bool ConnectButtonEnabled => ConnectStatus == ServerConnectStatus.Disconnected;
 
-    public bool CanCreateOrJoinRoom => IsConnected && !IsInRoom && !OperatingRoom;
+    public bool CanCreateOrJoinRoom => IsConnected && !IsInRoom && !IsOperatingRoom;
 
     public bool IsRoomOwner => RoomInfo?.RoomOwnerId == serverLinkHolder.UserId;
 
@@ -86,19 +87,6 @@ internal partial class ConnectXViewModel(
 
     public Visibility PingButtonVisibility => IsInRoom && !IsRoomOwner ? Visibility.Visible : Visibility.Collapsed;
 
-
-    //partial void OnIsInRoomChanged(bool value)
-    //{
-    //    if (value && !IsRoomOwner)
-    //    {
-    //        Task.Run(async () =>
-    //        {
-    //            var (connectable, isDirect, ping) = client.GetPartnerConState(roomService.GroupInfo!.RoomOwnerId);
-    //            await Dispatcher.EnqueueAsync(() => Ping = ping.ToString());
-    //        });
-    //    }
-    //}
-
     partial void OnServerNodeSelectionChanged(int value) => settingProvider.ServerNodeSelection = value;
 
     partial void OnUserServerAddressChanged(string value) => settingProvider.UserServerAddress = value;
@@ -110,38 +98,16 @@ internal partial class ConnectXViewModel(
     async Task DisconnectService() => await connectService.DisconnectAsync();
 
     [RelayCommand]
-    async Task CreateRoom()
-    {
-        OperatingRoom = true;
-        TaskCompletionSource tcs = new();
-
-        await dialogService.ShowAsync("ConnectXCreateRoomDialog", tcs);
-        await tcs.Task;
-
-        OperatingRoom = false;
-    }
+    async Task CreateRoom() => await dialogService.ShowAsync("ConnectXCreateRoomDialog");
 
     [RelayCommand]
-    async Task JoinRoom()
-    {
-        OperatingRoom = true;
-        TaskCompletionSource tcs = new();
-
-        await dialogService.ShowAsync("ConnectXJoinRoomDialog", tcs);
-        await tcs.Task;
-
-        OperatingRoom = false;
-    }
+    async Task JoinRoom() => await dialogService.ShowAsync("ConnectXJoinRoomDialog");
 
     [RelayCommand]
-    async Task LeaveRoom()
-    {
-        OperatingRoom = true;
+    async Task LeaveRoom() => await roomService.LeaveRoom();
 
-        await roomService.LeaveRoom();
-
-        OperatingRoom = false;
-    }
+    [RelayCommand]
+    async Task KickUser(UserInfo user) => await roomService.KickUserAsync(user.UserId);
 
     [RelayCommand]
     void CopyShortId()
@@ -174,7 +140,10 @@ internal partial class ConnectXViewModel(
     async void IRecipient<RoomInfoUpdatedMessage>.Receive(RoomInfoUpdatedMessage _)
         => await Dispatcher.EnqueueAsync(() => RoomInfo = roomService.GroupInfo);
 
-    async void IRecipient<ServerStateChangedMessage>.Receive(ServerStateChangedMessage message)
+    async void IRecipient<RoomOperatingMessage>.Receive(RoomOperatingMessage message)
+        => await Dispatcher.EnqueueAsync(() => IsOperatingRoom = message.Value);
+
+    async void IRecipient<ServerConnectStatusChangedMessage>.Receive(ServerConnectStatusChangedMessage message)
     {
         await Dispatcher.EnqueueAsync(() =>
         {

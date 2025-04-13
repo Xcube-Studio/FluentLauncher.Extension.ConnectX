@@ -70,7 +70,6 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
             serviceProvider.GetRequiredService<Router>(),
             serviceProvider.GetRequiredService<IZeroTierNodeLinkHolder>(),
             serviceProvider.GetRequiredService<IRoomInfoManager>(),
-            //serviceProvider.GetRequiredService<IServerLinkHolder>(),
             serviceProvider.GetRequiredService<PeerManager>(),
             serviceProvider.GetRequiredService<ProxyManager>(),
             serviceProvider.GetRequiredService<FakeServerMultiCaster>(),

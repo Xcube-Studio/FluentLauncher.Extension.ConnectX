@@ -23,11 +23,11 @@ public partial class ClientSettingProvider(ISettingsStorage storage)
         {
             return ServerNodeSelection switch
             {
-                1 => IPAddress.Parse(MiaoVpsServerAddress),
+                0 => Dns.GetHostAddresses(BaseServerAddress).FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork),
+                1 => Dns.GetHostAddresses(MiaoVpsServerAddress).FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork),
                 2 => IPAddress.Parse(UserServerAddress),
-                _ => Dns.GetHostAddresses(BaseServerAddress).FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork)
-                        ?? throw new ArgumentException("无法解析服务器地址"),
-            };
+                _ => null,
+            } ?? throw new ArgumentException("无法解析服务器地址");
         }
     }
 

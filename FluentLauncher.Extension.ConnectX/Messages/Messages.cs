@@ -5,10 +5,10 @@ namespace FluentLauncher.Extension.ConnectX.Messages;
 
 internal class ServerConnectFailedMessage();
 
-internal class ServerStateChangedMessage(ServerConnectStatus ConnectStatus) : ValueChangedMessage<ServerConnectStatus>(ConnectStatus);
+internal class ServerConnectStatusChangedMessage(ServerConnectStatus ConnectStatus) : ValueChangedMessage<ServerConnectStatus>(ConnectStatus);
+
+internal class RoomOperatingMessage(bool IsOperating) : ValueChangedMessage<bool>(IsOperating);
 
 internal class RoomStateChangedMessage(bool IsInRoom) : ValueChangedMessage<bool>(IsInRoom);
 
 internal class RoomInfoUpdatedMessage();
-
-

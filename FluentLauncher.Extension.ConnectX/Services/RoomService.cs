@@ -3,6 +3,7 @@ using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Messages.Group;
 using ConnectX.Shared.Models;
 using FluentLauncher.Extension.ConnectX.Messages;
+using System;
 using System.Threading.Tasks;
 
 using ConnectXClient = ConnectX.Client.Client;
@@ -36,53 +37,107 @@ internal class RoomService
         }
     }
 
+    public bool IsOperatingRoom
+    {
+        get => field;
+        private set
+        {
+            field = value;
+            WeakReferenceMessenger.Default.Send(new RoomOperatingMessage(field));
+        }
+    }
+
     public GroupInfo? GroupInfo => _roomInfoManager.CurrentGroupInfo;
 
     public async Task<(GroupCreationStatus, string?)> CreateRoomAsync(CreateGroup createGroup)
     {
-        var (_, status, error) = await _client.CreateGroupAsync(createGroup, default);
+        IsOperatingRoom = true;
 
-        if (status == GroupCreationStatus.Succeeded)
-            IsInRoom = true;
+        try
+        {
+            var (_, status, error) = await _client.CreateGroupAsync(createGroup, default);
 
-        return (status, error);
+            if (status == GroupCreationStatus.Succeeded)
+                IsInRoom = true;
+
+            return (status, error);
+        }
+        finally
+        {
+            IsOperatingRoom = false;
+        }
     }
 
     public async Task<(GroupCreationStatus, string?)> JoinRoomAsync(JoinGroup joinGroup)
     {
-        var (_, status, error) = await _client.JoinGroupAsync(joinGroup, default);
+        IsOperatingRoom = true;
 
-        if (status == GroupCreationStatus.Succeeded)
-            IsInRoom = true;
+        try
+        {
+            var (_, status, error) = await _client.JoinGroupAsync(joinGroup, default);
 
-        return (status, error);
+            if (status == GroupCreationStatus.Succeeded)
+                IsInRoom = true;
+
+            return (status, error);
+        }
+        finally
+        {
+            IsOperatingRoom = false;
+        }
     }
 
     public async Task<(bool, string?)> LeaveRoom()
     {
-        LeaveGroup leaveGroup = new()
+        IsOperatingRoom = true;
+
+        try
+        {
+            LeaveGroup leaveGroup = new()
+            {
+                GroupId = GroupInfo!.RoomId,
+                UserId = _serverLinkHolder.UserId
+            };
+
+            var (success, error) = await _client.LeaveGroupAsync(leaveGroup);
+
+            if (success)
+                IsInRoom = false;
+
+            return (success, error);
+        }
+        finally
+        {
+            IsOperatingRoom = false;
+        }
+    }
+
+    public async Task KickUserAsync(Guid guid)
+    {
+        KickUser kickUser = new()
         {
             GroupId = GroupInfo!.RoomId,
-            UserId = _serverLinkHolder.UserId
+            UserId = _serverLinkHolder.UserId,
+            UserToKick = guid
         };
 
-        var (success, error) = await _client.LeaveGroupAsync(leaveGroup);
-
-        if (success)
-            IsInRoom = false;
-
-        return (success, error);
+        await _client.KickUserAsync(kickUser);
     }
 
     private void OnServerLinkDisconnected() => IsInRoom = false;
 
     private void OnMemberBehaviorOccurred(GroupUserStates state, UserInfo? userInfo)
     {
-        if (state == GroupUserStates.Dismissed)
+        WeakReferenceMessenger.Default.Send(new RoomInfoUpdatedMessage());
+
+        if (state == GroupUserStates.Dismissed 
+            || (state == GroupUserStates.Kicked && userInfo?.UserId == _serverLinkHolder.UserId))
         {
             IsInRoom = false;
             return;
         }
+
+        Task.Run(() => _roomInfoManager.AcquireGroupInfoAsync(GroupInfo!.RoomId));
     }
 
     private void OnGroupInfoUpdated(GroupInfo obj) => WeakReferenceMessenger.Default.Send(new RoomInfoUpdatedMessage());
