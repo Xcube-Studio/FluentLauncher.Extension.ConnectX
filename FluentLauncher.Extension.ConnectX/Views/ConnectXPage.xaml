@@ -98,7 +98,7 @@
                         Title="服务稳定性警告"
                         IsClosable="True"
                         IsOpen="True"
-                        Message="这是一项实验性功能，并且将长期处于实验阶段。如你所见，目前该联机功能需要加载插件才能启用，我们暂不希望将该项功能作为启动器本体的一项功能，同时我们也只允许预览发行通道的部分版本允许插件载入。由于使用插件载入的形式，可能会出现一些不可预测的问题。其次联机服务使用的是开源项目 ConnectX ，目前该项目仍处于测试阶段，联机服务本身不稳定。除此之外，我们也不能保证该联机服务能持久运行，我们可能会在未来某一段时间终止该服务，也可能继续运行。"
+                        Message="这是一项实验性功能，我们只允许预览通道的部分版本以插件形式载入此功能，且我们暂不希望将该项功能作为启动器本体的一项功能。首先，由于我们使用插件载入，可能会出现一些不可预测的代码问题。其次，联机底层使用的是开源项目 ConnectX ，目前该项目仍处于测试阶段，不稳定。另外，我们也不能保证我们提供的服务节点稳定运行。如果遭遇问题，我们有可能会在未来某一段时间终止我们的服务节点，仅保留该插件的工具性质"
                         Opacity="0.85"
                         Severity="Warning" />
 
@@ -106,11 +106,11 @@
                         Title="公益性服务"
                         IsClosable="False"
                         IsOpen="True"
-                        Message="请不要攻击我们的联机服务器。该联机服务需要不小的成本，我们的服务是完全公益性质的，且服务器无法负担得起高连接数和高带宽流量，所以请不要攻击我们的联机服务器。另外，ConnectX 本身有一整套从客户端到服务端的开源实现，如果我们的服务节点出现了问题，用户可以自行部署节点并输入使用。MiaoVps 向我们提供了一个赞助节点，你可以在下方的服务节点中选择。"
+                        Message="请不要攻击我们的联机服务器。我们的服务是完全公益性质的，且服务器无法负担得起高连接数和高带宽流量。MiaoVps 向我们提供了一个赞助节点，你可以在下方的服务节点中选择。另外，用户可以自行部署 ConnectX.Server 节点并使用。"
                         Opacity="0.85"
                         Severity="Success" />
 
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
                         <HyperlinkButton Content="ConnectX 仓库" NavigateUri="https://github.com/Corona-Studio/ConnectX" />
                         <HyperlinkButton Content="MiaoVps" NavigateUri="https://www.miaovps.com" />
                     </StackPanel>
