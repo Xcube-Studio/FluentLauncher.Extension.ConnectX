@@ -5,6 +5,8 @@
 > _**实验性功能**_  
 > _目前仅在 Fluent Launcher 预览通道的部分发行版允许加载插件，并确定商店版本始终不会支持插件加载功能_
 
+![QQ_1744617955111](https://github.com/user-attachments/assets/849d93d7-5ef8-4a74-8ff4-475717db53e7)
+
 ## 功能
 基本上是对 ConnectX 本身的功能提供 UI 界面
 
@@ -20,6 +22,11 @@
 - [x] 支持房主管理房间成员
 
 ## 服务
-目前，我们在插件中提供了一个我们部署好的服务节点，这是完全免费的公益节点，如果遭遇攻击，我们会考虑终止该节点
+目前，我们在插件中提供了一个我们部署好的服务节点，这是完全免费的公益节点，如果遭遇攻击，我们会考虑终止该节点  
 
-![QQ_1744617955111](https://github.com/user-attachments/assets/849d93d7-5ef8-4a74-8ff4-475717db53e7)
+此外，在代码文件中 `ClientSettingProvider.cs` 我们不会列出我们的服务器地址，编译时请注意  
+
+``` CSharp
+private const string BaseServerAddress = "";
+private const string MiaoVpsServerAddress = "";
+```
