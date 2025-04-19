@@ -45,6 +45,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
     {
         services.AddSingleton<RoomService>();
         services.AddSingleton<ConnectService>();
+        services.AddSingleton<AccountService>();
         services.UseConnectX();
 
         services.AddSerilog(configure => 
@@ -78,6 +79,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
         backgroundServices.ForEach(s => Task.Run(async () => await s.StartAsync(default)));
 
         serviceProvider.GetService<ConnectService>();
+        serviceProvider.GetService<AccountService>();
     }
 
     void IExtension.SetExtensionFolder(string folder) => ExtensionFolder = folder;

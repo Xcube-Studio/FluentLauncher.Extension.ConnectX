@@ -49,7 +49,6 @@ internal partial class JoinRoomDialogViewModel(
             GroupId = Guid.Empty,
             RoomShortId = RoomShortId,
             RoomPassword = RoomPassword,
-            UserId = serverLinkHolder.UserId,
             UseRelayServer = UseRelay
         });
     }

@@ -60,8 +60,7 @@ internal partial class CreateRoomDialogViewModel(
             RoomDescription = RoomDescription,
             RoomPassword = RoomPassword,
             IsPrivate = IsPrivate,
-            UseRelayServer = UseRelay,
-            UserId = serverLinkHolder.UserId
+            UseRelayServer = UseRelay
         });
     }
 }

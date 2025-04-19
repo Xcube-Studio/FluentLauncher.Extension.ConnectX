@@ -20,6 +20,7 @@ using ConnectXClient = ConnectX.Client.Client;
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
 internal partial class ConnectXViewModel(
+    AccountService accountService,
     RoomService roomService,
     ConnectService connectService,
     ConnectXClient client,

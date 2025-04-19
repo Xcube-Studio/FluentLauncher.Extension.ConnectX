@@ -93,13 +93,7 @@ internal class RoomService
 
         try
         {
-            LeaveGroup leaveGroup = new()
-            {
-                GroupId = GroupInfo!.RoomId,
-                UserId = _serverLinkHolder.UserId
-            };
-
-            var (success, error) = await _client.LeaveGroupAsync(leaveGroup);
+            var (success, error) = await _client.LeaveGroupAsync(new());
 
             if (success)
                 IsInRoom = false;
@@ -116,8 +110,6 @@ internal class RoomService
     {
         KickUser kickUser = new()
         {
-            GroupId = GroupInfo!.RoomId,
-            UserId = _serverLinkHolder.UserId,
             UserToKick = guid
         };
 
