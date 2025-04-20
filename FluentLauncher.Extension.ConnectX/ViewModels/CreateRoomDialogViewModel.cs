@@ -1,15 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
 using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
-internal partial class CreateRoomDialogViewModel(
-    IServerLinkHolder serverLinkHolder, 
-    RoomService roomService) : ObservableRecipient
+internal partial class CreateRoomDialogViewModel(RoomService roomService) : ObservableRecipient
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateRoom))]

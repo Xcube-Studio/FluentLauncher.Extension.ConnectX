@@ -20,6 +20,8 @@ public sealed partial class ConnectXPage : Page
     {
         VM.Dispatcher = this.DispatcherQueue;
         VM.IsActive = true;
+
+        //VM.CheckAccount(XamlRoot);
     }
 
     private void Page_Unloaded(object sender, RoutedEventArgs e)

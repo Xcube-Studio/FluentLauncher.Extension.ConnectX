@@ -79,7 +79,6 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
         backgroundServices.ForEach(s => Task.Run(async () => await s.StartAsync(default)));
 
         serviceProvider.GetService<ConnectService>();
-        serviceProvider.GetService<AccountService>();
     }
 
     void IExtension.SetExtensionFolder(string folder) => ExtensionFolder = folder;

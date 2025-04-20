@@ -128,8 +128,6 @@ internal class RoomService
             IsInRoom = false;
             return;
         }
-
-        Task.Run(() => _roomInfoManager.AcquireGroupInfoAsync(GroupInfo!.RoomId));
     }
 
     private void OnGroupInfoUpdated(GroupInfo obj) => WeakReferenceMessenger.Default.Send(new RoomInfoUpdatedMessage());

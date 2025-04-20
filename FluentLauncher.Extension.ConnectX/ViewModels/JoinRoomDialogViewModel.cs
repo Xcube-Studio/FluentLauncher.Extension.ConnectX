@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
 using System;
@@ -8,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
-internal partial class JoinRoomDialogViewModel(
-    RoomService roomService, 
-    IServerLinkHolder serverLinkHolder) : ObservableRecipient
+internal partial class JoinRoomDialogViewModel(RoomService roomService) : ObservableRecipient
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanJoinRoom))]

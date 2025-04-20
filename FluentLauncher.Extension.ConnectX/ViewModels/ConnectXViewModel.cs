@@ -9,9 +9,11 @@ using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
 using FluentLauncher.Extension.ConnectX.Services;
 using FluentLauncher.Infra.UI.Dialogs;
+using FluentLauncher.Infra.UI.Navigation;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -26,12 +28,14 @@ internal partial class ConnectXViewModel(
     ConnectXClient client,
     ClientSettingProvider settingProvider,
     IServerLinkHolder serverLinkHolder,
+    INavigationService navigationService,
     IDialogActivationService<ContentDialogResult> dialogService) : ObservableRecipient,
     IRecipient<ServerConnectFailedMessage>, 
     IRecipient<ServerConnectStatusChangedMessage>,
     IRecipient<RoomOperatingMessage>,
     IRecipient<RoomInfoUpdatedMessage>,
-    IRecipient<RoomStateChangedMessage>
+    IRecipient<RoomStateChangedMessage>,
+    INavigationAware
 {
     internal DispatcherQueue Dispatcher { get; set; } = null!;
 
@@ -154,4 +158,24 @@ internal partial class ConnectXViewModel(
                 ConnectFailed = false;
         });
     }
+
+    //internal async void CheckAccount(XamlRoot xamlRoot)
+    //{
+    //    if (!accountService.HasMicrosoftAccount())
+    //    {
+    //        await new ContentDialog()
+    //        {
+    //            XamlRoot = xamlRoot,
+    //            Title = "需要正版验证",
+    //            Content = new TextBlock()
+    //            {
+    //                Text = "你至少需要在启动器中登录一个正版账号才能使用此功能"
+    //            },
+    //            DefaultButton = ContentDialogButton.Close,
+    //            CloseButtonText = "确定"
+    //        }.ShowAsync();
+
+    //        navigationService.GoBack();
+    //    }
+    //}
 }
