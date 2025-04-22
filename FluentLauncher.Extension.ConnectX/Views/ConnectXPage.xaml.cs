@@ -33,7 +33,7 @@ public sealed partial class ConnectXPage : Page
     {
         Border border = (Border)sender;
 
-        if (VM.IsRoomOwner && border.FindName("KickButton") is Button button)
+        if (VM.IsRoomOwner && border.FindName("KickButton") is HyperlinkButton button)
         {
             if (button.CommandParameter is UserInfo user && user.UserId != VM.RoomInfo?.RoomOwnerId)
             {
@@ -46,13 +46,39 @@ public sealed partial class ConnectXPage : Page
     {
         Border border = (Border)sender;
 
-        if (border.FindName("KickButton") is Button button)
+        if (border.FindName("KickButton") is HyperlinkButton button)
             button.Visibility = Visibility.Collapsed;
     }
 
     private void KickButton_Loaded(object sender, RoutedEventArgs e)
     {
-        Button button = (Button)sender;
+        HyperlinkButton button = (HyperlinkButton)sender;
         button.Command = VM.KickUserCommand;
+    }
+
+    internal static string GetNameFromDisplayName(string displayName)
+    {
+        string type = displayName[..2];
+
+        return type switch
+        {
+            "M:" => displayName[2..],
+            "Y:" => displayName[2..],
+            "O:" => displayName[2..],
+            _ => displayName
+        };
+    }
+
+    internal static string GetTypeFromDisplayName(string displayName)
+    {
+        string type = displayName[..2];
+
+        return type switch
+        {
+            "M:" => "微软",
+            "Y:" => "外置",
+            "O:" => "离线",
+            _ => "未知"
+        };
     }
 }

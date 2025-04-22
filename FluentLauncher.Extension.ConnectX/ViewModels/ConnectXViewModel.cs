@@ -13,7 +13,6 @@ using FluentLauncher.Infra.UI.Navigation;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -26,6 +25,7 @@ internal partial class ConnectXViewModel(
     RoomService roomService,
     ConnectService connectService,
     ConnectXClient client,
+    FakeMultiCasterService fakeMultiCasterService,
     ClientSettingProvider settingProvider,
     IServerLinkHolder serverLinkHolder,
     INavigationService navigationService,
@@ -35,6 +35,7 @@ internal partial class ConnectXViewModel(
     IRecipient<RoomOperatingMessage>,
     IRecipient<RoomInfoUpdatedMessage>,
     IRecipient<RoomStateChangedMessage>,
+    IRecipient<LanMultiCasterListenedMessage>,
     INavigationAware
 {
     internal DispatcherQueue Dispatcher { get; set; } = null!;
@@ -92,6 +93,12 @@ internal partial class ConnectXViewModel(
 
     public Visibility PingButtonVisibility => IsInRoom && !IsRoomOwner ? Visibility.Visible : Visibility.Collapsed;
 
+    public string? ListenedServerName => fakeMultiCasterService.ListenedServerName;
+
+    public int? ListenedServerPort => fakeMultiCasterService.ListenedServerPort;
+
+    public bool ListenedServer => fakeMultiCasterService.ListenedServer;
+
     partial void OnServerNodeSelectionChanged(int value) => settingProvider.ServerNodeSelection = value;
 
     partial void OnUserServerAddressChanged(string value) => settingProvider.UserServerAddress = value;
@@ -147,6 +154,16 @@ internal partial class ConnectXViewModel(
 
     async void IRecipient<RoomOperatingMessage>.Receive(RoomOperatingMessage message)
         => await Dispatcher.EnqueueAsync(() => IsOperatingRoom = message.Value);
+
+    async void IRecipient<LanMultiCasterListenedMessage>.Receive(LanMultiCasterListenedMessage _)
+    {
+        await Dispatcher.EnqueueAsync(() =>
+        {
+            OnPropertyChanged(nameof(ListenedServer));
+            OnPropertyChanged(nameof(ListenedServerName));
+            OnPropertyChanged(nameof(ListenedServerPort));
+        });
+    }
 
     async void IRecipient<ServerConnectStatusChangedMessage>.Receive(ServerConnectStatusChangedMessage message)
     {

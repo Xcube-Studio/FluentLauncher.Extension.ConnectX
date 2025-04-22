@@ -12,3 +12,5 @@ internal class RoomOperatingMessage(bool IsOperating) : ValueChangedMessage<bool
 internal class RoomStateChangedMessage(bool IsInRoom) : ValueChangedMessage<bool>(IsInRoom);
 
 internal class RoomInfoUpdatedMessage();
+
+internal class LanMultiCasterListenedMessage();

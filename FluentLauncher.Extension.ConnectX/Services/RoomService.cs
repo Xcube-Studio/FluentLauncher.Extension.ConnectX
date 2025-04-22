@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using ConnectX.Client.Interfaces;
+using ConnectX.Shared.Helpers;
 using ConnectX.Shared.Messages.Group;
 using ConnectX.Shared.Models;
 using FluentLauncher.Extension.ConnectX.Messages;
@@ -13,12 +14,14 @@ namespace FluentLauncher.Extension.ConnectX.Services;
 internal class RoomService
 {
     private readonly ConnectXClient _client;
+    private readonly AccountService _accountService;
     private readonly IRoomInfoManager _roomInfoManager;
     private readonly IServerLinkHolder _serverLinkHolder;
 
-    public RoomService(ConnectXClient client, IServerLinkHolder serverLinkHolder, IRoomInfoManager roomInfoManager)
+    public RoomService(ConnectXClient client, AccountService accountService, IServerLinkHolder serverLinkHolder, IRoomInfoManager roomInfoManager)
     {
         _client = client;
+        _accountService = accountService;
         _serverLinkHolder = serverLinkHolder;
         _roomInfoManager = roomInfoManager;
 
@@ -60,6 +63,8 @@ internal class RoomService
             if (status == GroupCreationStatus.Succeeded)
                 IsInRoom = true;
 
+            _client.UpdateDisplayNameAsync(_accountService.GetActiveAccountDisplayName(), default).Forget();
+
             return (status, error);
         }
         finally
@@ -78,6 +83,8 @@ internal class RoomService
 
             if (status == GroupCreationStatus.Succeeded)
                 IsInRoom = true;
+
+            _client.UpdateDisplayNameAsync(_accountService.GetActiveAccountDisplayName(), default).Forget();
 
             return (status, error);
         }

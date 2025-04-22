@@ -2,12 +2,27 @@
 using CommunityToolkit.Mvvm.Input;
 using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
-internal partial class CreateRoomDialogViewModel(RoomService roomService) : ObservableRecipient
+internal partial class CreateRoomDialogViewModel : ObservableRecipient
 {
+    private readonly RoomService _roomService;
+    private readonly AccountService _accountService;
+
+    public CreateRoomDialogViewModel(RoomService roomService, AccountService accountService)
+    {
+        _accountService = accountService;
+        _roomService = roomService;
+
+        object account = accountService.ActiveAccount;
+        Type accountType = account.GetType();
+
+        RoomName = $"{accountType.GetProperty("Name")?.GetValue(account) as string ?? "用户 Unknown"} 的房间";
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanCreateRoom))]
     public partial string RoomName { get; set; } = string.Empty;
@@ -50,7 +65,7 @@ internal partial class CreateRoomDialogViewModel(RoomService roomService) : Obse
     [RelayCommand]
     async Task CreateRoom()
     {
-        await roomService.CreateRoomAsync(new CreateGroup
+        await _roomService.CreateRoomAsync(new CreateGroup
         {
             MaxUserCount = MaxUserNumber,
             RoomName = RoomName,

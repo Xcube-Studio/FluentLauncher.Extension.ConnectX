@@ -24,7 +24,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
 {
     string IExtension.Name => "FluentLauncher.Extension.ConnectX";
 
-    string IExtension.Description => "[Preview] 适用于 Fluent Launcher 的 ConnectX 多人联机支持";
+    string IExtension.Description => "基于 ConnectX 开发的适用于 Fluent Launcher 的插件，提供用户友好的 UI 界面以便方便进行 Minecraft 远程联机";
 
     public static IServiceProvider? Services { get; private set; }
 
@@ -46,6 +46,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
         services.AddSingleton<RoomService>();
         services.AddSingleton<ConnectService>();
         services.AddSingleton<AccountService>();
+        services.AddSingleton<FakeMultiCasterService>();
         services.UseConnectX();
 
         services.AddSerilog(configure => 
