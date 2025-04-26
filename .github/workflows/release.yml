@@ -1,0 +1,99 @@
+name: Release
+
+on:
+    workflow_dispatch:
+        
+jobs:
+    build:
+        name: Build
+        runs-on: windows-latest
+
+        env: 
+            SolutionName: FluentLauncher.Extension.ConnectX
+            OutputPath: Build
+        
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
+                    submodules: recursive
+            
+            -   name: Install .NET 9
+                uses: actions/setup-dotnet@v4
+                with:
+                    dotnet-version: 9.0.x
+            
+            -   name: Setup MSBuild.exe
+                uses: microsoft/setup-msbuild@v2
+        
+            -   name: Build Extensions
+                run: msbuild ${{ env.OutputPath }} /t:"Restore;Build" /p:Configuration=${{ env.Configuration }} /p:OutputPath=${{ env.OutputPath }}
+                env:
+                  Configuration: Release
+            
+            -   name: Pack Extensions
+                run: |
+                    cd ${{ env.OutputPath }}
+
+                    Remove-Item -Path "runtimes" -Recurse -Force
+                    Remove-Item -Path "ZeroTier.Source.ReadOnly" -Recurse -Force
+                    
+                    Get-ChildItem -Path ".\Microsoft.Windows.*.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\Microsoft.Web.*.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\Microsoft.Extensions.*.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\CommunityToolkit.*.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\FluentLauncher.Infra.*.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\*.pdb" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\*.json" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\WinRT.Runtime.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\Microsoft.InteractiveExperiences.Projection.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\Microsoft.WindowsAppRuntime.Bootstrap.Net.dll" -Force | Remove-Item -Force
+                    Get-ChildItem -Path ".\Microsoft.WinUI.dll" -Force | Remove-Item -Force
+
+                    Get-ChildItem -Path "." -Directory -Recurse |
+                        Where-Object { $_.GetFiles().Count -eq 0 -and $_.GetDirectories().Count -eq 0 } |
+                        Remove-Item -Force
+                    
+                    $zipName = "FluentLauncher.Extension.ConnectX.zip"
+                    Compress-Archive -Path .\* -DestinationPath $zipName -Force
+            
+            -   name: Generate Tag
+                run: |
+                    $HttpClient = New-Object System.Net.Http.HttpClient
+                    $HttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+
+                    $releases = $HttpClient.GetStringAsync("https://api.github.com/repos/Xcube-Studio/FluentLauncher.Extension.ConnectX/releases").Result
+                        | ConvertFrom-Json 
+                    
+                    $major = 1
+                    $minor = 0
+                    $patch = 0
+                    
+                    $count = $releases.Count
+                    
+                    $patch += $count % 12
+                    $minor += [math]::Floor($count / 12)
+
+                    $major += [math]::Floor($minor / 6)
+                    $minor %= 6
+                    
+                    $version = "$major.$minor.$patch"
+                    echo "version=$version" >> $env:GITHUB_ENV
+                    
+            
+            -   name: Release
+                uses: ncipollo/release-action@v1.12.0
+                with:
+                    artifacts: "${{ env.OutputPath }}\\FluentLauncher.Extension.ConnectX.zip"
+                    allowUpdates: true
+                    generateReleaseNotes: true
+                    tag: "v${{ env.version }}"
+
+            
+            
+            
+
+
+        
+        
