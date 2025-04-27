@@ -4,13 +4,17 @@ on:
     workflow_dispatch:
         
 jobs:
-    build:
+    Build:
         name: Build
         runs-on: windows-latest
 
         env: 
             SolutionName: FluentLauncher.Extension.ConnectX
-            OutputPath: Build
+            OutputPath: Release
+
+        strategy:
+            matrix:
+                architecture: [x64]
         
         steps:
             -   name: Checkout
@@ -27,10 +31,35 @@ jobs:
             -   name: Setup MSBuild.exe
                 uses: microsoft/setup-msbuild@v2
         
+            -   name: Cache NuGet
+                uses: actions/cache@v3
+                with:
+                  path: C:\Users\runneradmin\.nuget\packages
+                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+                  restore-keys: |
+                    ${{ runner.os }}-nuget-
+
+            -   name: Write Secret
+                run: |
+                    $filePath = "FluentLauncher.Extension.ConnectX\ClientSettingProvider.cs"
+                    
+                    $BaseServerAddress = "${{ secrets.BASESERVERADDRESS }}"
+                    $MiaoVpsServerAddress = "${{ secrets.MIAOVPSSERVERADDRESS }}"
+                    
+                    $fileContent = Get-Content -Path $filePath
+                    $fileContent = $fileContent -replace 'private const string BaseServerAddress = "";', "private const string BaseServerAddress = `"$BaseServerAddress`";"
+                    $fileContent = $fileContent -replace 'private const string MiaoVpsServerAddress = "";', "private const string MiaoVpsServerAddress = `"$MiaoVpsServerAddress`";"
+
+                    Set-Content -Path $filePath -Value $fileContent
+
+            -   name: Pre Build Restore
+                run: msbuild FluentLauncher.Extension.ConnectX\FluentLauncher.Extension.ConnectX.csproj /t:"_GetAllRestoreProjectPathItems;Restore;_CheckForNETCoreSdkIsPreview;ResolveAssemblyReferences"
+            
             -   name: Build Extensions
-                run: msbuild ${{ env.OutputPath }} /t:"Restore;Build" /p:Configuration=${{ env.Configuration }} /p:OutputPath=${{ env.OutputPath }}
+                run: msbuild ${{ env.SolutionName }} /t:Build /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:OutputPath=..\$env:OutputPath
                 env:
-                  Configuration: Release
+                    Platform: ${{ matrix.architecture }}
+                    Configuration: Release
             
             -   name: Pack Extensions
                 run: |
@@ -55,9 +84,26 @@ jobs:
                         Where-Object { $_.GetFiles().Count -eq 0 -and $_.GetDirectories().Count -eq 0 } |
                         Remove-Item -Force
                     
-                    $zipName = "FluentLauncher.Extension.ConnectX.zip"
+                    $zipName = "FluentLauncher.Extension.ConnectX.${{ matrix.architecture }}.zip"
                     Compress-Archive -Path .\* -DestinationPath $zipName -Force
-            
+
+            -   name: Upload Artifacts
+                uses: actions/upload-artifact@v4
+                with:
+                    name: extension-${{ matrix.architecture }}
+                    path: ${{ env.OutputPath }}\FluentLauncher.Extension.ConnectX.${{ matrix.architecture }}.zip
+
+    Release:
+        name: Release
+        runs-on: windows-latest
+        needs: Build
+        steps:
+            -   name: Download Artifacts
+                uses: actions/download-artifact@v4
+                with:
+                    pattern: "extension-*"
+                    path: ${{ github.workspace }}
+
             -   name: Generate Tag
                 run: |
                     $HttpClient = New-Object System.Net.Http.HttpClient
@@ -80,20 +126,11 @@ jobs:
                     
                     $version = "$major.$minor.$patch"
                     echo "version=$version" >> $env:GITHUB_ENV
-                    
-            
+
             -   name: Release
                 uses: ncipollo/release-action@v1.12.0
                 with:
-                    artifacts: "${{ env.OutputPath }}\\FluentLauncher.Extension.ConnectX.zip"
+                    artifacts: "${{ github.workspace }}\\extension-*\\*.zip"
                     allowUpdates: true
                     generateReleaseNotes: true
                     tag: "v${{ env.version }}"
-
-            
-            
-            
-
-
-        
-        
