@@ -8,7 +8,7 @@
 ![QQ_1744617955111](https://github.com/user-attachments/assets/849d93d7-5ef8-4a74-8ff4-475717db53e7)
 
 ## 功能
-基本上是对 ConnectX 本身的功能提供 UI 界面
+在 Fluent Launcher 中窗口的侧栏添加了 `多人游戏` 的选项，内容就是为 ConnectX 本身的功能提供 UI 界面
 
 ### 网络
 - [x] 支持用户自定义 ConnectX.Server 服务地址
@@ -20,6 +20,14 @@
 - [x] 支持创建带有密码的私人房间
 - [x] 支持实时显示房间成员信息
 - [x] 支持房主管理房间成员
+
+## 安装
+
+### 自动安装
+- 下载仓库 [FluentLauncher.Extension.ConnectX](https://github.com/Xcube-Studio/FluentLauncher.Extension.ConnectX) 的 [Release](https://github.com/Xcube-Studio/FluentLauncher.Preview.Installer/releases) 中的 `FluentLauncher.UniversalInstaller` 安装向导来快速安装本插件到启动器
+
+### 手动安装
+- 下载本仓库 [Release](https://github.com/Xcube-Studio/FluentLauncher.Extension.ConnectX/releases/latest) 插件压缩包，然后在预览版本的 Fluent Launcher 中，打开 `设置` > `Extensions` > `Extensions storage directory` 来打开插件文件夹，将插件包解压到该目录下，然后重新运行启动器即可
 
 ## 服务
 目前，我们在插件中提供了一个我们部署好的服务节点，这是完全免费的公益节点，如果遭遇攻击，我们会考虑终止该节点  
