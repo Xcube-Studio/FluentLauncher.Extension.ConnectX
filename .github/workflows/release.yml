@@ -135,9 +135,10 @@ jobs:
                     generateReleaseNotes: true
                     tag: "v${{ env.version }}"
                     
-            -  name: UploadFiles
+            -  name: Upload Files
                uses: xcube-studio/sync2oss@v2
                with:
+                   repoUrl: "Xcube-Studio/FluentLauncher.Extension.ConnectX"
                    accessKeyId: ${{ secrets.ALIYUN_ACCESSKEYID }}
                    accessKeySecret: ${{secrets.ALIYUN_ACCESSKEYSECRET}}
                    endpoint: ${{secrets.ALIYUN_OSS_ENDPOINT}}
