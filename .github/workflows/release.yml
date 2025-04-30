@@ -134,3 +134,16 @@ jobs:
                     allowUpdates: true
                     generateReleaseNotes: true
                     tag: "v${{ env.version }}"
+                    
+            -  name: UploadFiles
+               uses: xcube-studio/sync2oss@v2.0
+               with:
+                   accessKeyId: ${{ secrets.ALIYUN_ACCESSKEYID }}
+                   accessKeySecret: ${{secrets.ALIYUN_ACCESSKEYSECRET}}
+                   endpoint: ${{secrets.ALIYUN_OSS_ENDPOINT}}
+                   bucketName: ${{secrets.ALIYUN_OSS_BUCKETNAME_1}}
+                   region: "cn-shanghai"
+                   addSymlink: True
+                   fromRelease: True
+                   
+                   
