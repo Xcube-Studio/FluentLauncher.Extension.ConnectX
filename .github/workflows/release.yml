@@ -135,7 +135,7 @@ jobs:
                     generateReleaseNotes: true
                     tag: "v${{ env.version }}"
                     
-            -  name: Upload Files
+            -  name: Upload Files To Oss
                uses: xcube-studio/sync2oss@v2
                with:
                    repoUrl: "Xcube-Studio/FluentLauncher.Extension.ConnectX"
@@ -146,5 +146,4 @@ jobs:
                    region: "cn-shanghai"
                    addSymlink: True
                    fromRelease: True
-                   
-                   
+                   remoteDir: "FluentLauncher.Extension.ConnectX"
