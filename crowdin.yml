@@ -1,0 +1,3 @@
+files:
+  - source: '*.xaml'
+    translation: /Strings/Resources.lang-%locale%.resw
