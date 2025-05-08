@@ -80,17 +80,30 @@ internal class FakeMultiCasterService
 
             multicastSocket.Bind(new IPEndPoint(IPAddress.Any, MulticastPort));
 
-            var receiveFromResult = await multicastSocket.ReceiveFromAsync(buffer, MulticastIpe);
-            var message = Encoding.UTF8.GetString(buffer, 0, receiveFromResult.ReceivedBytes);
-            var serverName = message["[MOTD]".Length..message.IndexOf("[/MOTD]", StringComparison.Ordinal)];
-            var portStart = message.IndexOf("[AD]", StringComparison.Ordinal) + 4;
-            var portEnd = message.IndexOf("[/AD]", StringComparison.Ordinal);
-            var port = ushort.Parse(message[portStart..portEnd]);
+            try
+            {
+                var receiveFromResult = await multicastSocket.ReceiveFromAsync(buffer, MulticastIpe);
+                var message = Encoding.UTF8.GetString(buffer, 0, receiveFromResult.ReceivedBytes);
+                var serverName = message["[MOTD]".Length..message.IndexOf("[/MOTD]", StringComparison.Ordinal)];
+                var portStart = message.IndexOf("[AD]", StringComparison.Ordinal) + 4;
+                var portEnd = message.IndexOf("[/AD]", StringComparison.Ordinal);
+                var port = ushort.Parse(message[portStart..portEnd]);
 
-            if (!(_roomInfoManager.CurrentGroupInfo.RoomOwnerId == _serverLinkHolder.UserId && serverName.StartsWith("[ConnectX]")))
-                OnListenedLanServer(serverName.TrimStart("[ConnectX]".ToCharArray()), port);
-
-            multicastSocket.Close();
+                if (!(_roomInfoManager.CurrentGroupInfo.RoomOwnerId == _serverLinkHolder.UserId && serverName.StartsWith("[ConnectX]")))
+                    OnListenedLanServer(serverName.TrimStart("[ConnectX]".ToCharArray()), port);
+            }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.Interrupted)
+            {
+                // Expected during shutdown
+            }
+            catch (Exception)
+            {
+                // 
+            }
+            finally
+            {
+                multicastSocket.Close();
+            }
 
             await Task.Delay(3000, stoppingToken);
         }
