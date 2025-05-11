@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI;
 using ConnectX.Client;
 using ConnectX.Client.Interfaces;
+using ConnectX.Shared.Helpers;
 using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
@@ -21,14 +22,12 @@ using ConnectXClient = ConnectX.Client.Client;
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
 internal partial class ConnectXViewModel(
-    AccountService accountService,
     RoomService roomService,
     ConnectService connectService,
     ConnectXClient client,
     FakeMultiCasterService fakeMultiCasterService,
     ClientSettingProvider settingProvider,
     IServerLinkHolder serverLinkHolder,
-    INavigationService navigationService,
     IDialogActivationService<ContentDialogResult> dialogService) : ObservableRecipient,
     IRecipient<ServerConnectFailedMessage>, 
     IRecipient<ServerConnectStatusChangedMessage>,
@@ -36,6 +35,7 @@ internal partial class ConnectXViewModel(
     IRecipient<RoomInfoUpdatedMessage>,
     IRecipient<RoomStateChangedMessage>,
     IRecipient<LanMultiCasterListenedMessage>,
+    IRecipient<InterconnectStatusChangedMessage>,
     INavigationAware
 {
     internal DispatcherQueue Dispatcher { get; set; } = null!;
@@ -77,6 +77,12 @@ internal partial class ConnectXViewModel(
     [ObservableProperty]
     public partial string UserServerAddress { get; set; } = settingProvider.UserServerAddress;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(InterconnectedServerMotdVisibility))]
+    public partial InterconnectServer? InterconnectServer {  get; set; } = settingProvider.InterconnectServer;
+
+    public string ConnectXClientVersion { get; } = typeof(ConnectXClient).Assembly.GetName().Version?.ToString()!;
+
     public bool ConnectButtonEnabled => ConnectStatus == ServerConnectStatus.Disconnected;
 
     public bool CanCreateOrJoinRoom => IsConnected && !IsInRoom && !IsOperatingRoom;
@@ -93,6 +99,8 @@ internal partial class ConnectXViewModel(
 
     public Visibility PingButtonVisibility => IsInRoom && !IsRoomOwner ? Visibility.Visible : Visibility.Collapsed;
 
+    public Visibility InterconnectedServerMotdVisibility => InterconnectServer != null ? Visibility.Visible : Visibility.Collapsed;
+
     public string? ListenedServerName => fakeMultiCasterService.ListenedServerName;
 
     public int? ListenedServerPort => fakeMultiCasterService.ListenedServerPort;
@@ -102,6 +110,8 @@ internal partial class ConnectXViewModel(
     partial void OnServerNodeSelectionChanged(int value) => settingProvider.ServerNodeSelection = value;
 
     partial void OnUserServerAddressChanged(string value) => settingProvider.UserServerAddress = value;
+
+    partial void OnRoomInfoChanged(GroupInfo? value) => RefreshPing().Forget();
 
     [RelayCommand]
     async Task TryConnectService() => await connectService.ConnectAsync();
@@ -143,6 +153,9 @@ internal partial class ConnectXViewModel(
         await Dispatcher.EnqueueAsync(() => Ping = connectionState?.Latency.ToString() ?? "-");
     }
 
+    [RelayCommand]
+    void ShowClientVersion(TeachingTip teachingTip) => teachingTip.IsOpen = !teachingTip.IsOpen;
+
     async void IRecipient<RoomStateChangedMessage>.Receive(RoomStateChangedMessage message)
         => await Dispatcher.EnqueueAsync(() => IsInRoom = message.Value);
 
@@ -154,6 +167,9 @@ internal partial class ConnectXViewModel(
 
     async void IRecipient<RoomOperatingMessage>.Receive(RoomOperatingMessage message)
         => await Dispatcher.EnqueueAsync(() => IsOperatingRoom = message.Value);
+
+    async void IRecipient<InterconnectStatusChangedMessage>.Receive(InterconnectStatusChangedMessage message)
+        => await Dispatcher.EnqueueAsync(() => InterconnectServer = message.InterconnectServer);
 
     async void IRecipient<LanMultiCasterListenedMessage>.Receive(LanMultiCasterListenedMessage _)
     {

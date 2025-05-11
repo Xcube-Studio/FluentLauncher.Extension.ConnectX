@@ -14,3 +14,8 @@ internal class RoomStateChangedMessage(bool IsInRoom) : ValueChangedMessage<bool
 internal class RoomInfoUpdatedMessage();
 
 internal class LanMultiCasterListenedMessage();
+
+internal class InterconnectStatusChangedMessage(bool isInterconnected, InterconnectServer? interconnectServer) : ValueChangedMessage<bool>(isInterconnected)
+{
+    public InterconnectServer? InterconnectServer { get; set; } = interconnectServer;
+};

@@ -111,8 +111,22 @@
                         Severity="Success" />
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
+                        <HyperlinkButton Command="{x:Bind VM.ShowClientVersionCommand}" CommandParameter="{x:Bind VersionTeachingTip}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="13.5" Glyph="&#xe946;" />
+                                <TextBlock Text="ConnectX.Client 版本" />
+                            </StackPanel>
+                        </HyperlinkButton>
                         <HyperlinkButton Content="ConnectX 仓库" NavigateUri="https://github.com/Corona-Studio/ConnectX" />
                         <HyperlinkButton Content="MiaoVps" NavigateUri="https://www.miaovps.com" />
+                        <TeachingTip
+                            Name="VersionTeachingTip"
+                            Title="ConnectX.Client 版本"
+                            Subtitle="{x:Bind VM.ConnectXClientVersion}">
+                            <TeachingTip.IconSource>
+                                <FontIconSource Glyph="&#xe946;" />
+                            </TeachingTip.IconSource>
+                        </TeachingTip>
                     </StackPanel>
 
                     <TextBlock Style="{ThemeResource SettingsSectionHeaderTextBlockStyle}" Text="服务状态" />
@@ -173,11 +187,10 @@
                         </StackPanel>
 
                         <controls:SettingsExpander.Items>
-                            <controls:SettingsCard Header="ConnectX 服务节点" IsEnabled="{x:Bind VM.ConnectButtonEnabled, Mode=OneWay}">
-                                <controls:SettingsCard.Description>
-                                    <TextBlock Foreground="{ThemeResource SystemErrorTextColor}" Text="请注意，目前不同节点之间不共享房间信息" />
-                                </controls:SettingsCard.Description>
-
+                            <controls:SettingsCard
+                                Header="ConnectX 服务节点"
+                                IsEnabled="{x:Bind VM.ConnectButtonEnabled, Mode=OneWay}"
+                                Visibility="{x:Bind local:ConnectXPage.InvertVisibility(VM.InterconnectedServerMotdVisibility), Mode=OneWay}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBox
                                         x:Name="UserServerAddressBox"
@@ -191,6 +204,11 @@
                                     </ComboBox>
                                 </StackPanel>
                             </controls:SettingsCard>
+                            <controls:SettingsCard
+                                Description="{x:Bind VM.InterconnectServer.ServerMotd, Mode=OneWay}"
+                                Header="{x:Bind VM.InterconnectServer.ServerName, Mode=OneWay}"
+                                IsEnabled="{x:Bind VM.ConnectButtonEnabled, Mode=OneWay}"
+                                Visibility="{x:Bind VM.InterconnectedServerMotdVisibility, Mode=OneWay}" />
                         </controls:SettingsExpander.Items>
                     </controls:SettingsExpander>
 

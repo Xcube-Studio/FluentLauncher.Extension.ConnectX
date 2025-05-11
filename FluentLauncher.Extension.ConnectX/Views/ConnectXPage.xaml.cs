@@ -81,4 +81,8 @@ public sealed partial class ConnectXPage : Page
             _ => "未知"
         };
     }
+
+    internal static Visibility InvertVisibility(Visibility visibility) => visibility == Visibility.Visible
+        ? Visibility.Collapsed
+        : Visibility.Visible;
 }

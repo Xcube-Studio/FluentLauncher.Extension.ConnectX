@@ -16,6 +16,7 @@ using Serilog.Filters;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX;
@@ -29,6 +30,8 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
     public static IServiceProvider? Services { get; private set; }
 
     public static string ExtensionFolder { get; private set; } = null!;
+
+    public CancellationTokenSource CancellationTokenSource { get; private set; } = new();
 
     public Dictionary<string, (Type, Type)> RegisteredPages { get; } = new()
     {
@@ -71,15 +74,14 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
         [
             serviceProvider.GetRequiredService<Router>(),
             serviceProvider.GetRequiredService<IZeroTierNodeLinkHolder>(),
+            serviceProvider.GetRequiredService<IServerLinkHolder>(),
             serviceProvider.GetRequiredService<IRoomInfoManager>(),
             serviceProvider.GetRequiredService<PeerManager>(),
             serviceProvider.GetRequiredService<ProxyManager>(),
             serviceProvider.GetRequiredService<FakeServerMultiCaster>(),
         ];
 
-        backgroundServices.ForEach(s => Task.Run(async () => await s.StartAsync(default)));
-
-        serviceProvider.GetService<ConnectService>();
+        backgroundServices.ForEach(s => Task.Run(async () => await s.StartAsync(CancellationTokenSource.Token)));
     }
 
     void IExtension.SetExtensionFolder(string folder) => ExtensionFolder = folder;

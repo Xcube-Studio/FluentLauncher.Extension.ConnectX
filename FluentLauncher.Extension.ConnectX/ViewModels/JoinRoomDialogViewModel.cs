@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
 using System;
 using System.Threading.Tasks;
@@ -41,7 +40,7 @@ internal partial class JoinRoomDialogViewModel(RoomService roomService) : Observ
     [RelayCommand]
     async Task JoinRoomAsync()
     {
-        await roomService.JoinRoomAsync(new JoinGroup
+        await roomService.JoinRoomAsync(new()
         {
             GroupId = Guid.Empty,
             RoomShortId = RoomShortId,
