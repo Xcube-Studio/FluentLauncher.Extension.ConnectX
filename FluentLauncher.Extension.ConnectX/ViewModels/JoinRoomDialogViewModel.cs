@@ -1,12 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ConnectX.Shared.Messages.Group;
 using FluentLauncher.Extension.ConnectX.Services;
+using FluentLauncher.Infra.UI.Dialogs;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX.ViewModels;
 
-internal partial class JoinRoomDialogViewModel(RoomService roomService) : ObservableRecipient
+internal partial class JoinRoomDialogViewModel(RoomService roomService) : ObservableRecipient, IDialogParameterAware
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanJoinRoom))]
@@ -23,6 +26,8 @@ internal partial class JoinRoomDialogViewModel(RoomService roomService) : Observ
     [ObservableProperty]
     public partial bool UseRelay { get; set; }
 
+    private IDialogActivationService<ContentDialogResult> DialogActivationService { get; set; } = null!;
+
     public bool CanJoinRoom
     {
         get
@@ -37,15 +42,17 @@ internal partial class JoinRoomDialogViewModel(RoomService roomService) : Observ
         }
     }
 
+    void IDialogParameterAware.HandleParameter(object param) => DialogActivationService = (IDialogActivationService<ContentDialogResult>)param;
+
     [RelayCommand]
     async Task JoinRoomAsync()
     {
-        await roomService.JoinRoomAsync(new()
+        await roomService.JoinRoomAsync(new JoinGroup()
         {
             GroupId = Guid.Empty,
             RoomShortId = RoomShortId,
             RoomPassword = RoomPassword,
             UseRelayServer = UseRelay
-        });
+        }, async s => await DialogActivationService.ShowAsync("ConnectXRequestRedirectDialog", s) == ContentDialogResult.Primary);
     }
 }

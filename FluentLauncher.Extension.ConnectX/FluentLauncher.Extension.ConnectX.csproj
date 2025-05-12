@@ -22,6 +22,7 @@
     <None Remove="Views\ConnectXPage.xaml" />
     <None Remove="Views\CreateRoomDialog.xaml" />
     <None Remove="Views\JoinRoomDialog.xaml" />
+    <None Remove="Views\RequestRedirectDialog.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
@@ -39,6 +40,11 @@
     <ProjectReference Include="..\FluentLauncher.Infra.Settings\FluentLauncher.Infra.Settings\FluentLauncher.Infra.Settings.csproj" />
     <ProjectReference Include="..\FluentLauncher.Infra.UI\FluentLauncher.Infra.UI\FluentLauncher.Infra.UI.csproj" />
     <ProjectReference Include="..\FluentLauncher.Infra.ExtensionHost\FluentLauncher.Infra.ExtensionHost\FluentLauncher.Infra.ExtensionHost.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\RequestRedirectDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\JoinRoomDialog.xaml">

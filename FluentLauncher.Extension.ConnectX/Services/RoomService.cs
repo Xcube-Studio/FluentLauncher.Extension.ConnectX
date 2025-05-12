@@ -2,6 +2,7 @@
 using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Helpers;
 using ConnectX.Shared.Messages.Group;
+using ConnectX.Shared.Messages.Server;
 using ConnectX.Shared.Models;
 using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
@@ -104,7 +105,9 @@ internal class RoomService
         }
     }
 
-    public async Task<(GroupCreationStatus, string?)> JoinRoomAsync(JoinGroup joinGroup)
+    public async Task<(GroupCreationStatus, string?)> JoinRoomAsync(
+        JoinGroup joinGroup, 
+        Func<InterconnectServerRegistration, Task<bool>> requestRedirect)
     {
         IsOperatingRoom = true;
 
@@ -123,7 +126,7 @@ internal class RoomService
             if (status == GroupCreationStatus.NeedRedirect)
             {
                 _notificationService.JoinRoomNeedRedirect();
-                return await RedirectAndJoinAsync(error!, joinGroup);
+                return await RedirectAndJoinAsync(status, error!, joinGroup, requestRedirect);
             }
 
             string reason = status switch
@@ -173,12 +176,23 @@ internal class RoomService
         await _client.KickUserAsync(kickUser);
     }
 
-    private async Task<(GroupCreationStatus, string?)> RedirectAndJoinAsync(string server, JoinGroup joinGroup)
+    private async Task<(GroupCreationStatus, string?)> RedirectAndJoinAsync(
+        GroupCreationStatus status, 
+        string server, 
+        JoinGroup joinGroup, 
+        Func<InterconnectServerRegistration, Task<bool>> requestRedirect)
     {
-        await _connectService.RedirectAsync(JsonSerializer.Deserialize<InterconnectServer>(server)
-            ?? throw new InvalidDataException());
+        InterconnectServerRegistration interconnectServer = JsonSerializer.Deserialize<InterconnectServerRegistration>(server)
+            ?? throw new InvalidDataException();
 
-        return await JoinRoomAsync(joinGroup);
+        if (!await requestRedirect(interconnectServer))
+        {
+            _notificationService.JoinRoomCancelRedirect();
+            return (status, server);
+        }
+
+        await _connectService.RedirectAsync(interconnectServer);
+        return await JoinRoomAsync(joinGroup, _ => Task.FromResult(false)); // 不允许二次重定向
     }
 
     private void OnServerLinkDisconnected() => IsInRoom = false;
@@ -217,6 +231,15 @@ internal static class RoomServiceNotifications
             Title = "加入房间中",
             Message = "已在其他服务节点上发现该房间，正在准备重定向连接",
             Type = NotificationType.Success,
+        });
+    }
+
+    public static void JoinRoomCancelRedirect(this INotificationService notificationService)
+    {
+        notificationService.Show(new Notification
+        {
+            Title = "已取消加入房间",
+            Message = "已拒绝重定向到该服务节点",
         });
     }
 }

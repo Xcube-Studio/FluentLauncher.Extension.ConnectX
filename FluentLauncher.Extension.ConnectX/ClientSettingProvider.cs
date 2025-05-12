@@ -1,5 +1,5 @@
 ﻿using ConnectX.Client.Interfaces;
-using FluentLauncher.Extension.ConnectX.Model;
+using ConnectX.Shared.Messages.Server;
 using FluentLauncher.Infra.Settings;
 using FluentLauncher.Infra.Settings.Converters;
 using System;
@@ -18,7 +18,7 @@ public partial class ClientSettingProvider(ISettingsStorage storage)
     [SettingItem(Default = 0, Converter = typeof(JsonStringConverter<int>))]
     public partial int ServerNodeSelection { get; set; }
 
-    public InterconnectServer? InterconnectServer { get; private set; }
+    public InterconnectServerRegistration? InterconnectServer { get; private set; }
 
     public bool UseInterconnect { get; private set; }
 
@@ -46,7 +46,7 @@ public partial class ClientSettingProvider(ISettingsStorage storage)
     private const string BaseServerAddress = "";
     private const string MiaoVpsServerAddress = "";
 
-    public void UseInterconnectServer(InterconnectServer interconnectServer)
+    public void UseInterconnectServer(InterconnectServerRegistration interconnectServer)
     {
         UseInterconnect = true;
         InterconnectServer = interconnectServer;

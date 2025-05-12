@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using ConnectX.Client.Interfaces;
+using ConnectX.Shared.Messages.Server;
 using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
 using FluentLauncher.Infra.UI.Notification;
@@ -84,7 +85,7 @@ internal class ConnectService
         }
     }
 
-    public async Task RedirectAsync(InterconnectServer interconnectServer)
+    public async Task RedirectAsync(InterconnectServerRegistration interconnectServer)
     {
         _clientSettingProvider.UseInterconnectServer(interconnectServer);
 
@@ -112,7 +113,7 @@ internal class ConnectService
 
 internal static class ConnectServiceNotifications
 {
-    public static void Redirected(this INotificationService notificationService, InterconnectServer interconnectServer)
+    public static void Redirected(this INotificationService notificationService, InterconnectServerRegistration interconnectServer)
     {
         notificationService.Show(new Notification
         {

@@ -6,6 +6,7 @@ using ConnectX.Client;
 using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Helpers;
 using ConnectX.Shared.Messages.Group;
+using ConnectX.Shared.Messages.Server;
 using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
 using FluentLauncher.Extension.ConnectX.Services;
@@ -79,7 +80,7 @@ internal partial class ConnectXViewModel(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InterconnectedServerMotdVisibility))]
-    public partial InterconnectServer? InterconnectServer {  get; set; } = settingProvider.InterconnectServer;
+    public partial InterconnectServerRegistration? InterconnectServer {  get; set; } = settingProvider.InterconnectServer;
 
     public string ConnectXClientVersion { get; } = typeof(ConnectXClient).Assembly.GetName().Version?.ToString()!;
 
@@ -123,7 +124,7 @@ internal partial class ConnectXViewModel(
     async Task CreateRoom() => await dialogService.ShowAsync("ConnectXCreateRoomDialog");
 
     [RelayCommand]
-    async Task JoinRoom() => await dialogService.ShowAsync("ConnectXJoinRoomDialog");
+    async Task JoinRoom() => await dialogService.ShowAsync("ConnectXJoinRoomDialog", dialogService);
 
     [RelayCommand]
     async Task LeaveRoom() => await roomService.LeaveRoom();

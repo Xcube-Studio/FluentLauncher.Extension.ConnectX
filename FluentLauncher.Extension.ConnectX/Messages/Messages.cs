@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
+using ConnectX.Shared.Messages.Server;
 using FluentLauncher.Extension.ConnectX.Model;
 
 namespace FluentLauncher.Extension.ConnectX.Messages;
@@ -15,7 +16,7 @@ internal class RoomInfoUpdatedMessage();
 
 internal class LanMultiCasterListenedMessage();
 
-internal class InterconnectStatusChangedMessage(bool isInterconnected, InterconnectServer? interconnectServer) : ValueChangedMessage<bool>(isInterconnected)
+internal class InterconnectStatusChangedMessage(bool isInterconnected, InterconnectServerRegistration? interconnectServer) : ValueChangedMessage<bool>(isInterconnected)
 {
-    public InterconnectServer? InterconnectServer { get; set; } = interconnectServer;
+    public InterconnectServerRegistration? InterconnectServer { get; set; } = interconnectServer;
 };

@@ -42,6 +42,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
     {
         { "ConnectXCreateRoomDialog", (typeof(CreateRoomDialog), typeof(CreateRoomDialogViewModel)) },
         { "ConnectXJoinRoomDialog", (typeof(JoinRoomDialog), typeof(JoinRoomDialogViewModel)) },
+        { "ConnectXRequestRedirectDialog", (typeof(RequestRedirectDialog), typeof(RequestRedirectDialogViewModel)) },
     };
 
     void IExtension.ConfigureServices(IServiceCollection services)
