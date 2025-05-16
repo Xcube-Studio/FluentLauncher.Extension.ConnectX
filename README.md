@@ -5,7 +5,7 @@
 > _**实验性功能**_  
 > _目前仅在 Fluent Launcher 预览通道的 **部分** 发行版允许加载插件，并确定商店版本 **始终不会** 支持插件加载功能_  
 
-![QQ_1744617955111](https://github.com/user-attachments/assets/849d93d7-5ef8-4a74-8ff4-475717db53e7)
+![QQ_1747386453411](https://github.com/user-attachments/assets/38e6f2e1-0bab-46e8-bf7e-8a614d3cab87)
 
 ## 功能
 在 Fluent Launcher 中窗口的侧栏添加了 `多人游戏` 的选项，内容就是为 ConnectX 本身的功能提供 UI 界面
