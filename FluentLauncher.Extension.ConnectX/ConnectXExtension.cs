@@ -1,7 +1,7 @@
 ﻿using ConnectX.Client.Helpers;
 using ConnectX.Client.Interfaces;
 using ConnectX.Client.Managers;
-using ConnectX.Client.Proxy;
+using ConnectX.Client.Proxy.FakeServerMultiCasters;
 using ConnectX.Client.Route;
 using FluentLauncher.Extension.ConnectX.Services;
 using FluentLauncher.Extension.ConnectX.Utils;
@@ -50,7 +50,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
         services.AddSingleton<RoomService>();
         services.AddSingleton<ConnectService>();
         services.AddSingleton<AccountService>();
-        services.AddSingleton<FakeMultiCasterService>();
+        services.AddSingleton<MultiCasterFinderService>();
         services.UseConnectX();
 
         services.AddSerilog(configure => 
@@ -79,7 +79,9 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
             serviceProvider.GetRequiredService<IRoomInfoManager>(),
             serviceProvider.GetRequiredService<PeerManager>(),
             serviceProvider.GetRequiredService<ProxyManager>(),
-            serviceProvider.GetRequiredService<FakeServerMultiCaster>(),
+            serviceProvider.GetRequiredService<FakeServerMultiCasterV4>(),
+            serviceProvider.GetRequiredService<FakeServerMultiCasterV6>(),
+            serviceProvider.GetRequiredService<MultiCasterFinderService>()
         ];
 
         backgroundServices.ForEach(s => Task.Run(async () => await s.StartAsync(CancellationTokenSource.Token)));

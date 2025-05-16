@@ -18,6 +18,9 @@ public partial class ClientSettingProvider(ISettingsStorage storage)
     [SettingItem(Default = 0, Converter = typeof(JsonStringConverter<int>))]
     public partial int ServerNodeSelection { get; set; }
 
+    [SettingItem(Default = true, Converter = typeof(JsonStringConverter<bool>))]
+    public partial bool ShowStabilityWarning { get; set; }
+
     public InterconnectServerRegistration? InterconnectServer { get; private set; }
 
     public bool UseInterconnect { get; private set; }

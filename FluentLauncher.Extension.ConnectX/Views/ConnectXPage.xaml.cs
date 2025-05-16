@@ -1,9 +1,11 @@
 ﻿using ConnectX.Shared.Messages.Group;
+using FluentLauncher.Extension.ConnectX.Model;
 using FluentLauncher.Extension.ConnectX.ViewModels;
 using FluentLauncher.Infra.ExtensionHost;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using System.Net.Sockets;
 
 namespace FluentLauncher.Extension.ConnectX.Views;
 
@@ -69,7 +71,7 @@ public sealed partial class ConnectXPage : Page
         };
     }
 
-    internal static string GetTypeFromDisplayName(string displayName)
+    internal static string GetAccountTypeFromDisplayName(string displayName)
     {
         string type = displayName[..2];
 
@@ -79,6 +81,22 @@ public sealed partial class ConnectXPage : Page
             "Y:" => "外置",
             "O:" => "离线",
             _ => "未知"
+        };
+    }
+
+    internal static string GetConnectMethodFromDisplayName(UserInfo userInfo) 
+        => userInfo.RelayServerAddress == null ? "直连" : "中继";
+
+    internal static string GetListenedServerString(MultiCasterServerInfo? multiCasterServerInfo)
+    {
+        if (multiCasterServerInfo == null) 
+            return "监听到游戏广播";
+
+        return multiCasterServerInfo.AddressFamily switch
+        {
+            AddressFamily.InterNetwork => "在 IPv4 上监听到游戏广播",
+            AddressFamily.InterNetworkV6 => "在 IPv6 上监听到游戏广播",
+            _ => "监听到游戏广播"
         };
     }
 

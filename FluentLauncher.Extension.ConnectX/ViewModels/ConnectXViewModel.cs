@@ -12,6 +12,7 @@ using FluentLauncher.Extension.ConnectX.Model;
 using FluentLauncher.Extension.ConnectX.Services;
 using FluentLauncher.Infra.UI.Dialogs;
 using FluentLauncher.Infra.UI.Navigation;
+using FluentLauncher.Infra.UI.Notification;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -26,9 +27,10 @@ internal partial class ConnectXViewModel(
     RoomService roomService,
     ConnectService connectService,
     ConnectXClient client,
-    FakeMultiCasterService fakeMultiCasterService,
+    MultiCasterFinderService fakeMultiCasterService,
     ClientSettingProvider settingProvider,
     IServerLinkHolder serverLinkHolder,
+    INotificationService notificationService,
     IDialogActivationService<ContentDialogResult> dialogService) : ObservableRecipient,
     IRecipient<ServerConnectFailedMessage>, 
     IRecipient<ServerConnectStatusChangedMessage>,
@@ -69,9 +71,6 @@ internal partial class ConnectXViewModel(
     public partial bool IsOperatingRoom { get; set; } = roomService.IsOperatingRoom;
 
     [ObservableProperty]
-    public partial bool CopyTeachingTipIsOpen { get; set; }
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowUserServerAddressBox))]
     public partial int ServerNodeSelection { get; set; } = settingProvider.ServerNodeSelection;
 
@@ -81,6 +80,9 @@ internal partial class ConnectXViewModel(
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InterconnectedServerMotdVisibility))]
     public partial InterconnectServerRegistration? InterconnectServer {  get; set; } = settingProvider.InterconnectServer;
+
+    [ObservableProperty]
+    public partial bool ShowStabilityWarning { get; set; } = settingProvider.ShowStabilityWarning;
 
     public string ConnectXClientVersion { get; } = typeof(ConnectXClient).Assembly.GetName().Version?.ToString()!;
 
@@ -102,15 +104,15 @@ internal partial class ConnectXViewModel(
 
     public Visibility InterconnectedServerMotdVisibility => InterconnectServer != null ? Visibility.Visible : Visibility.Collapsed;
 
-    public string? ListenedServerName => fakeMultiCasterService.ListenedServerName;
-
-    public int? ListenedServerPort => fakeMultiCasterService.ListenedServerPort;
+    public MultiCasterServerInfo? ListenedServerInfo => fakeMultiCasterService.ListenedServerInfo;
 
     public bool ListenedServer => fakeMultiCasterService.ListenedServer;
 
     partial void OnServerNodeSelectionChanged(int value) => settingProvider.ServerNodeSelection = value;
 
     partial void OnUserServerAddressChanged(string value) => settingProvider.UserServerAddress = value;
+
+    partial void OnShowStabilityWarningChanged(bool value) => settingProvider.ShowStabilityWarning = value;
 
     partial void OnRoomInfoChanged(GroupInfo? value) => RefreshPing().Forget();
 
@@ -141,7 +143,7 @@ internal partial class ConnectXViewModel(
             dataPackage.SetText(RoomInfo.RoomShortId);
 
             Clipboard.SetContent(dataPackage);
-            CopyTeachingTipIsOpen = true;
+            notificationService.CopidShortId();
         }
     }
 
@@ -155,7 +157,7 @@ internal partial class ConnectXViewModel(
     }
 
     [RelayCommand]
-    void ShowClientVersion(TeachingTip teachingTip) => teachingTip.IsOpen = !teachingTip.IsOpen;
+    void ShowClientVersion() => notificationService.ShowConnectXClientVersion(ConnectXClientVersion);
 
     async void IRecipient<RoomStateChangedMessage>.Receive(RoomStateChangedMessage message)
         => await Dispatcher.EnqueueAsync(() => IsInRoom = message.Value);
@@ -177,8 +179,7 @@ internal partial class ConnectXViewModel(
         await Dispatcher.EnqueueAsync(() =>
         {
             OnPropertyChanged(nameof(ListenedServer));
-            OnPropertyChanged(nameof(ListenedServerName));
-            OnPropertyChanged(nameof(ListenedServerPort));
+            OnPropertyChanged(nameof(ListenedServerInfo));
         });
     }
 
@@ -212,4 +213,27 @@ internal partial class ConnectXViewModel(
     //        navigationService.GoBack();
     //    }
     //}
+}
+
+internal static partial class ConnectXViewModelNotifications
+{
+    public static void CopidShortId(this INotificationService notificationService)
+    {
+        notificationService.Show(new TeachingTipNotification
+        {
+            Title = "已复制到剪切板",
+            Icon = "\ue73e"
+        });
+    }
+
+    public static void ShowConnectXClientVersion(this INotificationService notificationService, string connectXClientVersion)
+    {
+        notificationService.Show(new TeachingTipNotification
+        {
+            Title = "ConnectX.Client 版本",
+            Message = connectXClientVersion,
+            CloseButtonContent = "确定",
+            Icon = "\ue946"
+        });
+    }
 }

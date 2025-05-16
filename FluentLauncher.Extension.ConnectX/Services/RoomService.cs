@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using ConnectX.Client.Interfaces;
-using ConnectX.Shared.Helpers;
 using ConnectX.Shared.Messages.Group;
 using ConnectX.Shared.Messages.Server;
 using ConnectX.Shared.Models;
 using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
+using FluentLauncher.Extension.ConnectX.Views;
 using FluentLauncher.Infra.UI.Notification;
 using System;
 using System.IO;
@@ -19,7 +19,6 @@ namespace FluentLauncher.Extension.ConnectX.Services;
 internal class RoomService
 {
     private readonly ConnectXClient _client;
-    private readonly AccountService _accountService;
     private readonly ConnectService _connectService;
     private readonly ClientSettingProvider _clientSettingProvider;
 
@@ -38,7 +37,6 @@ internal class RoomService
         INotificationService notificationService)
     {
         _client = client;
-        _accountService = accountService;
         _connectService = connectService;
         _clientSettingProvider = clientSettingProvider;
 
@@ -95,8 +93,6 @@ internal class RoomService
             if (status == GroupCreationStatus.Succeeded)
                 IsInRoom = true;
 
-            _client.UpdateDisplayNameAsync(_accountService.GetActiveAccountDisplayName(), default).Forget();
-
             return (status, error);
         }
         finally
@@ -118,7 +114,6 @@ internal class RoomService
             if (status == GroupCreationStatus.Succeeded)
             {
                 IsInRoom = true;
-                _client.UpdateDisplayNameAsync(_accountService.GetActiveAccountDisplayName(), default).Forget();
 
                 return (status, error);
             }
@@ -201,11 +196,29 @@ internal class RoomService
     {
         WeakReferenceMessenger.Default.Send(new RoomInfoUpdatedMessage());
 
-        if (state == GroupUserStates.Dismissed 
-            || (state == GroupUserStates.Kicked && userInfo?.UserId == _serverLinkHolder.UserId))
+        if (state == GroupUserStates.Dismissed)
         {
             IsInRoom = false;
+            _notificationService.RoomDismissed();
             return;
+        }
+        else if (state == GroupUserStates.Kicked && userInfo?.UserId == _serverLinkHolder.UserId)
+        {
+            IsInRoom = false;
+            _notificationService.KickedFromRoom();
+            return;
+        }
+
+        switch (state)
+        {
+            case GroupUserStates.Joined:
+                _notificationService.MemberJoinRoom(userInfo!);
+                break;
+            case GroupUserStates.Left:
+            case GroupUserStates.Kicked:
+            case GroupUserStates.Disconnected:
+                _notificationService.MemberLeaveRoom(userInfo!);
+                break;
         }
     }
 
@@ -242,4 +255,16 @@ internal static class RoomServiceNotifications
             Message = "已拒绝重定向到该服务节点",
         });
     }
+
+    public static void MemberJoinRoom(this INotificationService notificationService, UserInfo userInfo)
+        => notificationService.Show(new TeachingTipNotification { Title = $"成员 {ConnectXPage.GetNameFromDisplayName(userInfo.DisplayName)} 正在加入房间", Icon = "\ue946" });
+
+    public static void MemberLeaveRoom(this INotificationService notificationService, UserInfo userInfo)
+        => notificationService.Show(new TeachingTipNotification { Title = $"成员 {ConnectXPage.GetNameFromDisplayName(userInfo.DisplayName)} 离开房间", Icon = "\ue946" });
+
+    public static void RoomDismissed(this INotificationService notificationService)
+        => notificationService.Show(new TeachingTipNotification { Title = "房间已被解散", Icon = "\ue946" });
+
+    public static void KickedFromRoom(this INotificationService notificationService) 
+        => notificationService.Show(new TeachingTipNotification { Title = "你已被踢出房间", Icon = "\ue946" });
 }

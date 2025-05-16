@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using ConnectX.Client.Interfaces;
+using ConnectX.Shared.Helpers;
 using ConnectX.Shared.Messages.Server;
 using FluentLauncher.Extension.ConnectX.Messages;
 using FluentLauncher.Extension.ConnectX.Model;
@@ -7,13 +8,17 @@ using FluentLauncher.Infra.UI.Notification;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ConnectXClient = ConnectX.Client.Client;
+
 namespace FluentLauncher.Extension.ConnectX.Services;
 
 internal class ConnectService
 {
-    private readonly IServerLinkHolder _serverLinkHolder;
+    private readonly ConnectXClient _client;
+    private readonly AccountService _accountService;
     private readonly ClientSettingProvider _clientSettingProvider;
 
+    private readonly IServerLinkHolder _serverLinkHolder;
     private readonly INotificationService _notificationService;
 
     public bool ConnectFailed 
@@ -41,18 +46,23 @@ internal class ConnectService
     } = ServerConnectStatus.Disconnected;
 
     public ConnectService(
-        IServerLinkHolder serverLinkHolder, 
+        ConnectXClient client,
+        AccountService accountService,
         ClientSettingProvider clientSettingProvider,
+        IServerLinkHolder serverLinkHolder,
         INotificationService notificationService)
     {
-        _serverLinkHolder = serverLinkHolder;
+        _client = client;
+        _accountService = accountService;
         _clientSettingProvider = clientSettingProvider;
+
+        _serverLinkHolder = serverLinkHolder;
         _notificationService = notificationService;
 
         _serverLinkHolder.OnServerLinkDisconnected += OnServerLinkDisconnected;
     }
 
-    public async Task ConnectAsync()
+    public Task ConnectAsync() => Task.Run(async () =>
     {
         Status = ServerConnectStatus.Connecting;
 
@@ -68,10 +78,11 @@ internal class ConnectService
 
             if (!_serverLinkHolder.IsConnected)
                 ConnectFailed = true;
+            else _client.UpdateDisplayNameAsync(_accountService.GetActiveAccountDisplayName(), default).Forget();
         }
-    }
+    });
 
-    public async Task DisconnectAsync()
+    public Task DisconnectAsync() => Task.Run(async () =>
     {
         try
         {
@@ -83,7 +94,7 @@ internal class ConnectService
                 ? ServerConnectStatus.Connected
                 : ServerConnectStatus.Disconnected;
         }
-    }
+    });
 
     public async Task RedirectAsync(InterconnectServerRegistration interconnectServer)
     {

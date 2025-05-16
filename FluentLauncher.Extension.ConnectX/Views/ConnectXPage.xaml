@@ -97,7 +97,7 @@
                     <InfoBar
                         Title="服务稳定性警告"
                         IsClosable="True"
-                        IsOpen="True"
+                        IsOpen="{x:Bind VM.ShowStabilityWarning, Mode=TwoWay}"
                         Message="这是一项实验性功能，我们只允许预览通道的部分版本以插件形式载入此功能，且我们暂不希望将该项功能作为启动器本体的一项功能。首先，由于我们使用插件载入，可能会出现一些不可预测的代码问题。其次，联机底层使用的是开源项目 ConnectX ，目前该项目仍处于测试阶段，不稳定。另外，我们也不能保证我们提供的服务节点稳定运行。如果遭遇问题，我们有可能会在未来某一段时间终止我们的服务节点，仅保留该插件的工具性质"
                         Opacity="0.85"
                         Severity="Warning" />
@@ -111,7 +111,7 @@
                         Severity="Success" />
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <HyperlinkButton Command="{x:Bind VM.ShowClientVersionCommand}" CommandParameter="{x:Bind VersionTeachingTip}">
+                        <HyperlinkButton Command="{x:Bind VM.ShowClientVersionCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <FontIcon FontSize="13.5" Glyph="&#xe946;" />
                                 <TextBlock Text="ConnectX.Client 版本" />
@@ -119,14 +119,6 @@
                         </HyperlinkButton>
                         <HyperlinkButton Content="ConnectX 仓库" NavigateUri="https://github.com/Corona-Studio/ConnectX" />
                         <HyperlinkButton Content="MiaoVps" NavigateUri="https://www.miaovps.com" />
-                        <TeachingTip
-                            Name="VersionTeachingTip"
-                            Title="ConnectX.Client 版本"
-                            Subtitle="{x:Bind VM.ConnectXClientVersion}">
-                            <TeachingTip.IconSource>
-                                <FontIconSource Glyph="&#xe946;" />
-                            </TeachingTip.IconSource>
-                        </TeachingTip>
                     </StackPanel>
 
                     <TextBlock Style="{ThemeResource SettingsSectionHeaderTextBlockStyle}" Text="服务状态" />
@@ -322,16 +314,16 @@
 
                     <InfoBar
                         x:Name="ListenedServerInfoBar"
-                        Title="监听到游戏广播"
+                        Title="{x:Bind local:ConnectXPage.GetListenedServerString(VM.ListenedServerInfo), Mode=OneWay}"
                         Margin="0,0,0,-2"
                         x:Load="{x:Bind VM.ListenedServer, Mode=OneWay}"
                         IsClosable="False"
                         IsOpen="True"
-                        Message="{x:Bind VM.ListenedServerName, Mode=OneWay}"
+                        Message="{x:Bind VM.ListenedServerInfo.Port, Mode=OneWay}"
                         Opacity="0.85"
                         Severity="Success">
                         <InfoBar.ActionButton>
-                            <HyperlinkButton Content="{x:Bind VM.ListenedServerPort, Mode=OneWay}" />
+                            <HyperlinkButton Content="{x:Bind VM.ListenedServerInfo.Name, Mode=OneWay}" />
                         </InfoBar.ActionButton>
                     </InfoBar>
 
@@ -378,7 +370,7 @@
                         <GridView.ItemTemplate>
                             <DataTemplate x:DataType="group:UserInfo">
                                 <Border
-                                    Width="160"
+                                    Width="210"
                                     MinHeight="40"
                                     Padding="16,8"
                                     HorizontalAlignment="Stretch"
@@ -393,19 +385,34 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <Border
-                                            Padding="5,0,5,0.5"
-                                            VerticalAlignment="Center"
-                                            CornerRadius="2.5">
-                                            <Border.Background>
-                                                <SolidColorBrush Opacity="0.25" Color="{ThemeResource SystemAccentColor}" />
-                                            </Border.Background>
-                                            <TextBlock
-                                                Margin="0,-1,0,0"
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Border
+                                                Padding="5,0,5,0.5"
                                                 VerticalAlignment="Center"
-                                                Style="{ThemeResource CaptionTextBlockStyle}"
-                                                Text="{x:Bind local:ConnectXPage.GetTypeFromDisplayName(DisplayName)}" />
-                                        </Border>
+                                                CornerRadius="2.5">
+                                                <Border.Background>
+                                                    <SolidColorBrush Opacity="0.25" Color="{ThemeResource SystemAccentColor}" />
+                                                </Border.Background>
+                                                <TextBlock
+                                                    Margin="0,-1,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Text="{x:Bind local:ConnectXPage.GetConnectMethodFromDisplayName((group:UserInfo))}" />
+                                            </Border>
+                                            <Border
+                                                Padding="5,0,5,0.5"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="2.5">
+                                                <Border.Background>
+                                                    <SolidColorBrush Opacity="0.25" Color="{ThemeResource SystemAccentColor}" />
+                                                </Border.Background>
+                                                <TextBlock
+                                                    Margin="0,-1,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                                    Text="{x:Bind local:ConnectXPage.GetAccountTypeFromDisplayName(DisplayName)}" />
+                                            </Border>
+                                        </StackPanel>
 
                                         <TextBlock
                                             Grid.Column="1"
@@ -436,15 +443,6 @@
                             </DataTemplate>
                         </GridView.ItemTemplate>
                     </GridView>
-
-                    <TeachingTip
-                        Title="已复制到剪切板"
-                        IsOpen="{x:Bind VM.CopyTeachingTipIsOpen, Mode=TwoWay}"
-                        Target="{x:Bind CopyButton}">
-                        <TeachingTip.IconSource>
-                            <FontIconSource Glyph="&#xe73e;" />
-                        </TeachingTip.IconSource>
-                    </TeachingTip>
                 </StackPanel>
             </Border>
         </ScrollViewer>
