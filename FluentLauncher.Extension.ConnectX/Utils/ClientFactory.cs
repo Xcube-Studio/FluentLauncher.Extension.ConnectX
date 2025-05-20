@@ -41,11 +41,11 @@ public static class ClientFactory
         services.AddSingleton<ProxyManager>();
         services.AddHostedService(sp => sp.GetRequiredService<ProxyManager>());
 
-        //services.AddHostedService<FakeServerMultiCasterV4>();
-        //services.AddHostedService<FakeServerMultiCasterV6>();
-
         services.AddSingleton<FakeServerMultiCasterV4>();
         services.AddSingleton<FakeServerMultiCasterV6>();
+
+        services.AddHostedService(sp => sp.GetRequiredService<FakeServerMultiCasterV4>());
+        services.AddHostedService(sp => sp.GetRequiredService<FakeServerMultiCasterV6>());
 
         services.AddSingleton<PartnerManager>();
 

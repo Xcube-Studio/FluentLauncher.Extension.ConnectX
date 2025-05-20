@@ -1,23 +1,16 @@
 ﻿using ConnectX.Client.Helpers;
-using ConnectX.Client.Interfaces;
-using ConnectX.Client.Managers;
-using ConnectX.Client.Proxy.FakeServerMultiCasters;
-using ConnectX.Client.Route;
 using FluentLauncher.Extension.ConnectX.Services;
 using FluentLauncher.Extension.ConnectX.Utils;
 using FluentLauncher.Extension.ConnectX.ViewModels;
 using FluentLauncher.Extension.ConnectX.Views;
 using FluentLauncher.Infra.ExtensionHost.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml.Controls;
 using Serilog;
 using Serilog.Filters;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FluentLauncher.Extension.ConnectX;
 
@@ -30,8 +23,6 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
     public static IServiceProvider? Services { get; private set; }
 
     public static string ExtensionFolder { get; private set; } = null!;
-
-    public CancellationTokenSource CancellationTokenSource { get; private set; } = new();
 
     public Dictionary<string, (Type, Type)> RegisteredPages { get; } = new()
     {
@@ -47,11 +38,14 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
 
     void IExtension.ConfigureServices(IServiceCollection services)
     {
+        services.UseConnectX();
+
         services.AddSingleton<RoomService>();
         services.AddSingleton<ConnectService>();
         services.AddSingleton<AccountService>();
+
         services.AddSingleton<MultiCasterFinderService>();
-        services.UseConnectX();
+        services.AddHostedService(sp => sp.GetRequiredService<MultiCasterFinderService>());
 
         services.AddSerilog(configure => 
         {
@@ -67,25 +61,7 @@ public class ConnectXExtension : IExtension, INavigationProviderExtension
         });
     }
 
-    void IExtension.SetServiceProvider(IServiceProvider serviceProvider)
-    {
-        Services = serviceProvider;
-
-        List<IHostedService> backgroundServices =
-        [
-            serviceProvider.GetRequiredService<Router>(),
-            serviceProvider.GetRequiredService<IZeroTierNodeLinkHolder>(),
-            serviceProvider.GetRequiredService<IServerLinkHolder>(),
-            serviceProvider.GetRequiredService<IRoomInfoManager>(),
-            serviceProvider.GetRequiredService<PeerManager>(),
-            serviceProvider.GetRequiredService<ProxyManager>(),
-            serviceProvider.GetRequiredService<FakeServerMultiCasterV4>(),
-            serviceProvider.GetRequiredService<FakeServerMultiCasterV6>(),
-            serviceProvider.GetRequiredService<MultiCasterFinderService>()
-        ];
-
-        backgroundServices.ForEach(s => Task.Run(async () => await s.StartAsync(CancellationTokenSource.Token)));
-    }
+    void IExtension.SetServiceProvider(IServiceProvider serviceProvider) { }
 
     void IExtension.SetExtensionFolder(string folder) => ExtensionFolder = folder;
 
