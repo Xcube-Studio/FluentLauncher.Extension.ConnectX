@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using ConnectX.Client;
 using ConnectX.Client.Interfaces;
 using ConnectX.Shared.Messages.Group;
 using ConnectX.Shared.Messages.Server;
@@ -29,7 +30,6 @@ internal class RoomService
 
     public RoomService(
         ConnectXClient client,
-        AccountService accountService, 
         ConnectService connectService, 
         ClientSettingProvider clientSettingProvider,
         IServerLinkHolder serverLinkHolder,
@@ -82,18 +82,18 @@ internal class RoomService
 
     public GroupInfo? GroupInfo => _roomInfoManager.CurrentGroupInfo;
 
-    public async Task<(GroupCreationStatus, string?)> CreateRoomAsync(CreateGroup createGroup)
+    public async Task<OpResult> CreateRoomAsync(CreateGroup createGroup)
     {
         IsOperatingRoom = true;
 
         try
         {
-            var (_, status, error) = await _client.CreateGroupAsync(createGroup, default);
+            OpResult result = await _client.CreateGroupAsync(createGroup, default);
 
-            if (status == GroupCreationStatus.Succeeded)
+            if (result.Status == GroupCreationStatus.Succeeded)
                 IsInRoom = true;
 
-            return (status, error);
+            return result;
         }
         finally
         {
@@ -101,7 +101,7 @@ internal class RoomService
         }
     }
 
-    public async Task<(GroupCreationStatus, string?)> JoinRoomAsync(
+    public async Task<OpResult> JoinRoomAsync(
         JoinGroup joinGroup, 
         Func<InterconnectServerRegistration, Task<bool>> requestRedirect)
     {
@@ -109,32 +109,32 @@ internal class RoomService
 
         try
         {
-            var (_, status, error) = await _client.JoinGroupAsync(joinGroup, default);
+            var result = await _client.JoinGroupAsync(joinGroup, default);
 
-            if (status == GroupCreationStatus.Succeeded)
+            if (result.Status == GroupCreationStatus.Succeeded)
             {
                 IsInRoom = true;
 
-                return (status, error);
+                return result;
             }
 
-            if (status == GroupCreationStatus.NeedRedirect)
+            if (result.Status == GroupCreationStatus.NeedRedirect)
             {
                 _notificationService.JoinRoomNeedRedirect();
-                return await RedirectAndJoinAsync(status, error!, joinGroup, requestRedirect);
+                return await RedirectAndJoinAsync(result, joinGroup, requestRedirect);
             }
 
-            string reason = status switch
+            string reason = result.Status switch
             {
                 GroupCreationStatus.GroupNotExists => "不存在该房间，请检查你的邀请码",
                 GroupCreationStatus.AlreadyInRoom => "已经在房间中了，请先退出该房间",
                 GroupCreationStatus.GroupIsFull => "该房间已满",
                 GroupCreationStatus.PasswordIncorrect => "房间密码不正确",
-                _ => $"发生内部错误, {error}"
+                _ => $"发生内部错误, {result.Error}"
             };
 
             _notificationService.JoinRoomFailed(reason);
-            return (status, error);
+            return result;
         }
         finally
         {
@@ -171,19 +171,21 @@ internal class RoomService
         await _client.KickUserAsync(kickUser);
     }
 
-    private async Task<(GroupCreationStatus, string?)> RedirectAndJoinAsync(
-        GroupCreationStatus status, 
-        string server, 
+    private async Task<OpResult> RedirectAndJoinAsync(
+        OpResult result, 
         JoinGroup joinGroup, 
         Func<InterconnectServerRegistration, Task<bool>> requestRedirect)
     {
+        if (!result.Metadata.TryGetValue("InterconnectServer", out string? server))
+            throw new InvalidDataException();
+
         InterconnectServerRegistration interconnectServer = JsonSerializer.Deserialize<InterconnectServerRegistration>(server)
             ?? throw new InvalidDataException();
 
         if (!await requestRedirect(interconnectServer))
         {
             _notificationService.JoinRoomCancelRedirect();
-            return (status, server);
+            return result;
         }
 
         await _connectService.RedirectAsync(interconnectServer);

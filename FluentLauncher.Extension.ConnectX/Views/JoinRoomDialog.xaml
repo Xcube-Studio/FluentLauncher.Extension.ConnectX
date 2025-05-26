@@ -35,7 +35,6 @@
 
         <StackPanel Orientation="Horizontal" Spacing="8">
             <CheckBox Content="私人房间" IsChecked="{x:Bind VM.IsPrivate, Mode=TwoWay}" />
-            <CheckBox Content="使用中继服务器" IsChecked="{x:Bind VM.UseRelay, Mode=TwoWay}" />
         </StackPanel>
     </StackPanel>
 </ContentDialog>

@@ -23,9 +23,6 @@ internal partial class JoinRoomDialogViewModel(RoomService roomService) : Observ
 
     public partial bool IsPrivate { get; set; }
 
-    [ObservableProperty]
-    public partial bool UseRelay { get; set; }
-
     private IDialogActivationService<ContentDialogResult> DialogActivationService { get; set; } = null!;
 
     public bool CanJoinRoom
@@ -51,8 +48,7 @@ internal partial class JoinRoomDialogViewModel(RoomService roomService) : Observ
         {
             GroupId = Guid.Empty,
             RoomShortId = RoomShortId,
-            RoomPassword = RoomPassword,
-            UseRelayServer = UseRelay
+            RoomPassword = RoomPassword
         }, async s => await DialogActivationService.ShowAsync("ConnectXRequestRedirectDialog", s) == ContentDialogResult.Primary);
     }
 }
