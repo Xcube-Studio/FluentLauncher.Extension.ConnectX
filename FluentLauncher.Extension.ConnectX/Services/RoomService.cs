@@ -176,7 +176,7 @@ internal class RoomService
         JoinGroup joinGroup, 
         Func<InterconnectServerRegistration, Task<bool>> requestRedirect)
     {
-        if (!result.Metadata.TryGetValue("InterconnectServer", out string? server))
+        if (!result.Metadata.TryGetValue(GroupOpResult.MetadataRedirectInfo, out string? server))
             throw new InvalidDataException();
 
         InterconnectServerRegistration interconnectServer = JsonSerializer.Deserialize<InterconnectServerRegistration>(server)
